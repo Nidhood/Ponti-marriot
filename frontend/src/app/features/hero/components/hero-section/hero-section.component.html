@@ -1,0 +1,35 @@
+<section class="relative w-full {{ minHeightClass }}">
+  <div class="absolute inset-0">
+    <img [ngSrc]="backgroundUrl" alt="" fill priority class="object-cover" />
+    <div class="absolute inset-0 bg-slate-900/60"></div>
+    <div
+      class="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950/80"
+    ></div>
+  </div>
+
+  <div
+    class="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8"
+  >
+    <div class="max-w-2xl text-left text-white">
+      <h1
+        class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight"
+      >
+        {{ title }}
+      </h1>
+      <p *ngIf="subtitle" class="mt-5 text-base sm:text-lg text-slate-200">
+        {{ subtitle }}
+      </p>
+
+      <div *ngIf="action" class="mt-8">
+        <a
+          [href]="action!.href"
+          [attr.aria-label]="action!.ariaLabel || action!.label"
+          (click)="actionClick.emit()"
+          class="inline-flex items-center rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+        >
+          {{ action!.label }}
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

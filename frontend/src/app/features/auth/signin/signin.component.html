@@ -1,0 +1,9 @@
+<app-auth-layout>
+  <app-auth-visual
+    visual
+    [imageSrc]="visualConfig.imageSrc"
+    [imageAlt]="visualConfig.imageAlt"
+  />
+
+  <app-auth-form form [config]="formConfig" (submitForm)="onSignin($event)" />
+</app-auth-layout>
