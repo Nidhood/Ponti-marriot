@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { HeaderComponent } from './components/header/header.component';
-import { HeroSectionComponent } from './components/hero-section/hero-section.component';
-import { FooterComponent } from './components/footer/footer.component';
+import { HomeHeaderComponent } from './components/home-header/home-header.component';
+import { HomeHeroComponent } from './components/home-hero/home-hero.component';
+import { HomeFooterComponent } from './components/home-footer/home-footer.component';
+
 import {
   FOOTER_GROUPS,
   HERO_BG,
@@ -10,10 +11,16 @@ import {
   HERO_TITLE,
   NAV_LINKS,
 } from './models/hero.data';
+import { HomeBrandsComponent } from './components/home-brands/home-brands.component';
 
 @Component({
   selector: 'app-home',
-  imports: [HeaderComponent, HeroSectionComponent, FooterComponent],
+  imports: [
+    HomeHeaderComponent,
+    HomeHeaderComponent,
+    HomeHeroComponent,
+    HomeFooterComponent,
+  ],
   templateUrl: './home.component.html',
   styles: ``,
 })

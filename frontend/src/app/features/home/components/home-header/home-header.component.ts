@@ -18,12 +18,12 @@ export interface NavLink {
 
 @Component({
   standalone: true,
-  selector: 'app-header',
+  selector: 'app-home-header',
   imports: [NgFor, NgIf, NgOptimizedImage, ButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './header.component.html',
+  templateUrl: './home-header.component.html',
 })
-export class HeaderComponent {
+export class HomeHeaderComponent {
   @HostBinding('class') host = 'block fixed top-0 left-0 right-0 z-50';
   @Input() logoSrc = '';
   @Input() logoAlt = 'Logo';

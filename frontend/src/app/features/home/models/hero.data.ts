@@ -1,6 +1,6 @@
-import { NavLink } from '../components/header/header.component';
-import { HeroAction } from '../components/hero-section/hero-section.component';
-import { FooterGroup } from '../components/footer/footer.component';
+import { NavLink } from '../components/home-header/home-header.component';
+import { HeroAction } from '../components/home-hero/home-hero.component';
+import { FooterGroup } from '../components/home-footer/home-footer.component';
 
 // Header navigation links:
 export const NAV_LINKS: NavLink[] = [

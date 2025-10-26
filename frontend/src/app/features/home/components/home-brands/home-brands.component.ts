@@ -8,12 +8,12 @@ export interface Brand {
 
 @Component({
   standalone: true,
-  selector: 'app-brands-section',
+  selector: 'app-home-brands',
   imports: [NgFor, NgIf],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './brands-section.component.html',
+  templateUrl: './home-brands.component.html',
 })
-export class BrandsSectionComponent {
+export class HomeBrandsComponent {
   @Input() title = 'Trusted by enterprises for mission-critical use cases';
   @Input() subtitle =
     'Payments systems, IAM, logistics, user accounts, and more';

@@ -23,12 +23,12 @@ export interface Brand {
 
 @Component({
   standalone: true,
-  selector: 'app-hero-section',
+  selector: 'app-home-hero',
   imports: [NgIf, NgOptimizedImage, ButtonModule, NgFor],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './hero-section.component.html',
+  templateUrl: './home-hero.component.html',
 })
-export class HeroSectionComponent {
+export class HomeHeroComponent {
   @HostBinding('class') host = 'block';
   @Input() backgroundUrl = '/images/luxury-hotel-hero.jpeg';
   @Input() title = '';

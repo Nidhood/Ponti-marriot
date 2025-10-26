@@ -13,12 +13,12 @@ export interface FooterGroup {
 
 @Component({
   standalone: true,
-  selector: 'app-footer',
+  selector: 'app-home-footer',
   imports: [NgFor],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './footer.component.html',
+  templateUrl: './home-footer.component.html',
 })
-export class FooterComponent {
+export class HomeFooterComponent {
   @Input() groups: FooterGroup[] = [];
   @Input() copyrightHolder = '';
   year = new Date().getFullYear();
