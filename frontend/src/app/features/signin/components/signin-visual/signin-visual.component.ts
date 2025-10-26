@@ -3,12 +3,12 @@ import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   standalone: true,
-  selector: 'app-auth-visual',
+  selector: 'app-signin-visual',
   imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './auth-visual.component.html',
+  templateUrl: './signin-visual.component.html',
 })
-export class AuthVisualComponent {
+export class SigninVisualComponent {
   @Input() imageSrc = '';
   @Input() imageAlt = '3D Illustration';
 }

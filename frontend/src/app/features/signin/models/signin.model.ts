@@ -1,9 +1,9 @@
-export interface AuthCredentials {
+export interface SigninCredentials {
   username: string;
   password: string;
 }
 
-export interface AuthFormConfig {
+export interface SigninFormConfig {
   title: string;
   subtitle: string;
   usernameLabel: string;
@@ -15,7 +15,7 @@ export interface AuthFormConfig {
   forgotPasswordLink: string;
 }
 
-export interface AuthVisualConfig {
+export interface SigninVisualConfig {
   imageSrc: string;
   imageAlt: string;
 }
