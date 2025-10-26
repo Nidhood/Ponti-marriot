@@ -6,7 +6,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { NgIf, NgOptimizedImage, NgFor } from '@angular/common'; // 👈 Agregar NgFor aquí
+import { NgIf, NgOptimizedImage, NgFor } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Router } from '@angular/router';
 

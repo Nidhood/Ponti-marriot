@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { HeaderComponent } from '../hero/components/header/header.component';
-import { HeroSectionComponent } from '../hero/components/hero-section/hero-section.component';
-import { FooterComponent } from '../hero/components/footer/footer.component';
+import { HeaderComponent } from './components/header/header.component';
+import { HeroSectionComponent } from './components/hero-section/hero-section.component';
+import { FooterComponent } from './components/footer/footer.component';
 import {
   FOOTER_GROUPS,
   HERO_BG,
@@ -9,7 +9,7 @@ import {
   HERO_SUBTITLE,
   HERO_TITLE,
   NAV_LINKS,
-} from '../hero/models/hero.data';
+} from './models/hero.data';
 
 @Component({
   selector: 'app-home',
