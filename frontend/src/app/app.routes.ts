@@ -6,5 +6,14 @@ export const routes: Routes = [
   // Public routes:
   { path: '', component: HomeComponent },
   { path: 'auth/signin', component: SigninComponent },
+
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./features/dashboard/dashboard.component').then(
+        (m) => m.DashboardComponent
+      ),
+  },
+  // Fallback
   { path: '**', redirectTo: '' },
 ];

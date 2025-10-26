@@ -1,0 +1,62 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <!-- Header (Full Width) -->
+  <app-dashboard-header
+    [title]="getCurrentTitle()"
+    [subtitle]="getCurrentSubtitle()"
+    [currentUser]="currentUser()"
+  ></app-dashboard-header>
+
+  <!-- Layout: Sidebar + Content -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
+    <app-dashboard-sidebar
+      [menuItems]="menuItems()"
+      [mobileOpen]="mobileMenuOpen()"
+      (itemClicked)="changeView($event)"
+      (mobileToggle)="toggleMobileMenu()"
+    ></app-dashboard-sidebar>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 md:ml-64">
+      <!-- Overview Component -->
+      <app-dashboard-overview *ngIf="isOverview()"></app-dashboard-overview>
+
+      <!-- Reservations Component -->
+      <app-dashboard-reservations
+        *ngIf="isReservations()"
+      ></app-dashboard-reservations>
+
+      <!-- Guests Component (Lazy Loaded) -->
+      <div *ngIf="isGuests()" class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-900">Guests Module</h2>
+        <p class="text-gray-500 mt-2">Coming soon...</p>
+      </div>
+
+      <!-- Rooms Component (Lazy Loaded) -->
+      <div *ngIf="isRooms()" class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-900">Rooms Module</h2>
+        <p class="text-gray-500 mt-2">Coming soon...</p>
+      </div>
+
+      <!-- Payments Component (Lazy Loaded) -->
+      <div *ngIf="isPayments()" class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-900">Payments Module</h2>
+        <p class="text-gray-500 mt-2">Coming soon...</p>
+      </div>
+
+      <!-- Reports Component (Lazy Loaded) -->
+      <div *ngIf="isReports()" class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-900">Reports Module</h2>
+        <p class="text-gray-500 mt-2">Coming soon...</p>
+      </div>
+
+      <!-- Account Component (Lazy Loaded) -->
+      <div *ngIf="isAccount()" class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-900">
+          Account Settings Module
+        </h2>
+        <p class="text-gray-500 mt-2">Coming soon...</p>
+      </div>
+    </main>
+  </div>
+</div>

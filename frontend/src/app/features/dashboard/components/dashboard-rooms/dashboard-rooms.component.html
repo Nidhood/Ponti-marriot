@@ -1,0 +1,226 @@
+<!-- src/app/features/dashboard/components/dashboard-rooms/dashboard-rooms.component.html -->
+
+<div class="space-y-6">
+  <!-- Header with Add Button -->
+  <div class="flex items-center justify-end">
+    <button
+      pButton
+      type="button"
+      label="Add new room"
+      icon="pi pi-plus"
+      class="p-button-warning"
+      style="background-color: #eab308; border-color: #eab308"
+    ></button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Total Rooms -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Total Rooms</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ stats().totalRooms }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"
+        >
+          <i class="pi pi-building text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Available</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ stats().available }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"
+        >
+          <i class="pi pi-check-circle text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Occupied -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Occupied</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ stats().occupied }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center"
+        >
+          <i class="pi pi-star-fill text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avg. Rate/Night -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Avg. Rate/Night</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ formatCurrency(stats().avgRatePerNight) }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"
+        >
+          <i class="pi pi-user-plus text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room Type Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div
+      *ngFor="let roomType of roomTypeStats()"
+      class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
+    >
+      <!-- Room Image -->
+      <div class="relative h-64 bg-gray-200">
+        <img
+          [src]="roomType.image"
+          [alt]="roomType.type"
+          class="w-full h-full object-cover"
+          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22 fill=%22%23e5e7eb%22%3E%3Crect width=%22400%22 height=%22300%22/%3E%3Cpath fill=%22%239ca3af%22 d=%22M150 100h100v50h-100z M175 150v30h50v-30z%22/%3E%3C/svg%3E'"
+        />
+      </div>
+
+      <!-- Room Info -->
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">
+          {{ roomType.type }}
+        </h3>
+        <p class="text-sm text-gray-600 mb-4">{{ roomType.description }}</p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div>
+            <p class="text-xs text-gray-500">Total rooms:</p>
+            <p class="font-semibold text-gray-900">{{ roomType.totalRooms }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Available:</p>
+            <p class="font-semibold text-green-600">{{ roomType.available }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500">Rate/Night:</p>
+            <p class="font-semibold text-yellow-600">
+              {{ formatCurrency(roomType.ratePerNight) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <button
+            pButton
+            type="button"
+            label="View Details"
+            icon="pi pi-eye"
+            class="p-button-sm flex-1"
+            style="background-color: #1e293b; border-color: #1e293b"
+            (click)="viewRoomDetails(roomType)"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            class="p-button-sm p-button-outlined"
+            pTooltip="Edit"
+            tooltipPosition="top"
+            (click)="editRoom(roomType)"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Room Reservations -->
+  <div
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+  >
+    <div
+      class="px-6 py-4 border-b border-gray-200 flex items-center justify-between"
+    >
+      <h2 class="text-lg font-bold text-gray-900">Recent Room Reservations</h2>
+
+      <!-- Filters -->
+      <div class="flex items-center gap-3">
+        <p-dropdown
+          [options]="hotelOptions()"
+          [(ngModel)]="selectedHotel"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          styleClass="w-48"
+          (onChange)="onFilterChange()"
+        ></p-dropdown>
+
+        <p-dropdown
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          placeholder="All Status"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          styleClass="w-40"
+          (onChange)="onFilterChange()"
+        ></p-dropdown>
+
+        <p-dropdown
+          [options]="roomTypeOptions"
+          [(ngModel)]="selectedRoomType"
+          placeholder="All Room Types"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          styleClass="w-40"
+          (onChange)="onFilterChange()"
+        ></p-dropdown>
+      </div>
+    </div>
+
+    <!-- Reservations Table -->
+    <p-table
+      [value]="recentReservations()"
+      [loading]="loading()"
+      styleClass="p-datatable-sm"
+      responsiveLayout="scroll"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="font-semibold text-gray-700">GUEST</th>
+          <th class="font-semibold text-gray-700">ROOM TYPE</th>
+          <th class="font-semibold text-gray-700">ROOM</th>
+          <th class="font-semibold text-gray-700">CHECK-IN</th>
+          <th class="font-semibold text-gray-700">CHECK-OUT</th>
+          <th class="font-semibold text-gray-700">STATUS</th>
+          <th class="font-semibold text-gray-700">TOTAL</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-reservation>
+        <tr>
+          <!-- Guest -->
+          <td>
+            <div class="flex items"></div>
+          </td></tr></ng-template
+    ></p-table>
+  </div>
+</div>

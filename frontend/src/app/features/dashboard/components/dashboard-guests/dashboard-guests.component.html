@@ -1,0 +1,551 @@
+<!-- src/app/features/dashboard/components/dashboard-guests/dashboard-guests.component.html -->
+
+<div class="space-y-6">
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Total Guests -->
+    <div
+      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+    >
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-600">Total Guests</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ stats().totalGuests.toLocaleString() }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"
+        >
+          <i class="pi pi-users text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Guest Details Dialog -->
+<p-dialog
+  [(visible)]="showDetailDialog"
+  [header]="'Guest Details - ' + (selectedGuest()?.name || '')"
+  [modal]="true"
+  [style]="{ width: '50vw' }"
+  [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div *ngIf="selectedGuest() as guest" class="space-y-6">
+    <!-- Personal Information -->
+    <div>
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-user text-blue-600"></i>
+        Personal Information
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600">Guest ID</p>
+          <p class="font-semibold text-gray-900">{{ guest.guestId }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Full Name</p>
+          <p class="font-semibold text-gray-900">{{ guest.name }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Email</p>
+          <p class="font-semibold text-gray-900">{{ guest.email }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Phone</p>
+          <p class="font-semibold text-gray-900">{{ guest.phone }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Nationality</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.nationality || "N/A" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Document</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.documentType }} - {{ guest.documentNumber }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stay Information -->
+    <div class="border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-calendar text-blue-600"></i>
+        Stay Information
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600">Room Number</p>
+          <p class="font-semibold text-gray-900">{{ guest.room.number }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Room Type</p>
+          <p class="font-semibold text-gray-900">{{ guest.room.type }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Check-in</p>
+          <p class="font-semibold text-gray-900">
+            {{ formatDate(guest.checkIn) }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Check-out</p>
+          <p class="font-semibold text-gray-900">
+            {{ formatDate(guest.checkOut) }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Status</p>
+          <p-tag
+            [value]="guest.status"
+            [severity]="getStatusSeverity(guest.status)"
+          ></p-tag>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Loyalty Tier</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.loyaltyTier || "Standard" }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Information -->
+    <div class="border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-map-marker text-blue-600"></i>
+        Address
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <p class="text-sm text-gray-600">Street Address</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.address || "N/A" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">City</p>
+          <p class="font-semibold text-gray-900">{{ guest.city || "N/A" }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Country</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.country || "N/A" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Zip Code</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.zipCode || "N/A" }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Contact -->
+    <div *ngIf="guest.emergencyContact" class="border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-phone text-blue-600"></i>
+        Emergency Contact
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600">Name</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.emergencyContact.name }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Phone</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.emergencyContact.phone }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Relationship</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.emergencyContact.relationship }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest Statistics -->
+    <div class="border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-chart-bar text-blue-600"></i>
+        Guest Statistics
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600">Total Stays</p>
+          <p class="font-semibold text-gray-900 text-lg">
+            {{ guest.totalStays || 0 }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Total Spent</p>
+          <p class="font-semibold text-gray-900 text-lg">
+            ${{ guest.totalSpent?.toLocaleString() || 0 }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences -->
+    <div *ngIf="guest.preferences" class="border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i class="pi pi-heart text-blue-600"></i>
+        Preferences
+      </h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600">Bed Type</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.preferences.bedType || "Any" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Floor Preference</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.preferences.floorPreference || "Any" }}
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600">Smoking Room</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.preferences.smokingRoom ? "Yes" : "No" }}
+          </p>
+        </div>
+        <div *ngIf="guest.preferences.specialRequests" class="col-span-2">
+          <p class="text-sm text-gray-600">Special Requests</p>
+          <p class="font-semibold text-gray-900">
+            {{ guest.preferences.specialRequests }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="border-t border-gray-200 pt-4 flex gap-2 justify-end">
+      <button
+        pButton
+        type="button"
+        label="Edit"
+        icon="pi pi-pencil"
+        class="p-button-primary"
+        (click)="editGuest(guest)"
+      ></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Toast Messages -->
+<p-toast></p-toast>
+
+<!-- Confirmation Dialog -->
+<p-confirmDialog></p-confirmDialog>>
+
+<!-- Active Guests -->
+<div
+  class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+>
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <p class="text-sm font-medium text-gray-600">Active Guests</p>
+      <p class="text-2xl font-bold text-gray-900 mt-2">
+        {{ stats().activeGuests }}
+      </p>
+    </div>
+    <div
+      class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"
+    >
+      <i class="pi pi-user-plus text-xl"></i>
+    </div>
+  </div>
+</div>
+
+<!-- VIP Guests -->
+<div
+  class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+>
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <p class="text-sm font-medium text-gray-600">VIP Guests</p>
+      <p class="text-2xl font-bold text-gray-900 mt-2">
+        {{ stats().vipGuests }}
+      </p>
+    </div>
+    <div
+      class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center"
+    >
+      <i class="pi pi-star-fill text-xl"></i>
+    </div>
+  </div>
+</div>
+
+<!-- New Today -->
+<div
+  class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+>
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <p class="text-sm font-medium text-gray-600">New Today</p>
+      <p class="text-2xl font-bold text-gray-900 mt-2">
+        {{ stats().newToday }}
+      </p>
+    </div>
+    <div
+      class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"
+    >
+      <i class="pi pi-user-plus text-xl"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <!-- Search -->
+    <div class="md:col-span-2">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          placeholder="Search by name or email"
+          class="w-full"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onFilterChange()"
+        />
+      </span>
+    </div>
+
+    <!-- Status Filter -->
+    <div>
+      <p-dropdown
+        [options]="statusOptions"
+        [(ngModel)]="selectedStatus"
+        placeholder="Guess Status"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="false"
+        styleClass="w-full"
+        (onChange)="onFilterChange()"
+      ></p-dropdown>
+    </div>
+
+    <!-- Room Type Filter -->
+    <div>
+      <p-dropdown
+        [options]="roomTypeOptions"
+        [(ngModel)]="selectedRoomType"
+        placeholder="Room Type"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="false"
+        styleClass="w-full"
+        (onChange)="onFilterChange()"
+      ></p-dropdown>
+    </div>
+  </div>
+
+  <!-- Apply Filters Button -->
+  <div class="mt-4 pt-4 border-t border-gray-200 flex justify-end">
+    <button
+      pButton
+      type="button"
+      label="Apply Filters"
+      icon="pi pi-filter"
+      class="p-button-lg"
+      style="background-color: #1e293b; border-color: #1e293b"
+      (click)="applyFilters()"
+    ></button>
+  </div>
+</div>
+
+<!-- Guests Table -->
+<div
+  class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+>
+  <p-table
+    [value]="guests()"
+    [loading]="loading()"
+    [paginator]="false"
+    [rows]="pageSize()"
+    styleClass="p-datatable-sm"
+    responsiveLayout="scroll"
+    [rowHover]="true"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="font-semibold text-gray-700">GUEST</th>
+        <th class="font-semibold text-gray-700">CONTACT</th>
+        <th class="font-semibold text-gray-700">ROOM</th>
+        <th class="font-semibold text-gray-700">CHECK-IN</th>
+        <th class="font-semibold text-gray-700">CHECK-OUT</th>
+        <th class="font-semibold text-gray-700">STATUS</th>
+        <th class="font-semibold text-gray-700 text-center">ACTIONS</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-guest>
+      <tr>
+        <!-- Guest -->
+        <td>
+          <div class="flex items-center gap-3">
+            <img
+              [src]="
+                guest.avatar ||
+                'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23cbd5e1%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E'
+              "
+              [alt]="guest.name"
+              class="w-10 h-10 rounded-full bg-gray-200 object-cover"
+            />
+            <div>
+              <p class="text-sm font-medium text-gray-900">{{ guest.name }}</p>
+              <p class="text-xs text-gray-500">{{ guest.guestId }}</p>
+            </div>
+          </div>
+        </td>
+
+        <!-- Contact -->
+        <td>
+          <div>
+            <p class="text-sm text-gray-900">{{ guest.email }}</p>
+            <p class="text-xs text-gray-500">{{ guest.phone }}</p>
+          </div>
+        </td>
+
+        <!-- Room -->
+        <td>
+          <div>
+            <p class="text-sm font-medium text-gray-900">
+              {{ guest.room.type }}
+            </p>
+            <p class="text-xs text-gray-500">{{ guest.room.number }}</p>
+          </div>
+        </td>
+
+        <!-- Check-in -->
+        <td>
+          <span class="text-sm text-gray-700">{{
+            formatDate(guest.checkIn)
+          }}</span>
+        </td>
+
+        <!-- Check-out -->
+        <td>
+          <span class="text-sm text-gray-700">{{
+            formatDate(guest.checkOut)
+          }}</span>
+        </td>
+
+        <!-- Status -->
+        <td>
+          <p-tag
+            [value]="guest.status"
+            [severity]="getStatusSeverity(guest.status)"
+            [rounded]="true"
+          ></p-tag>
+        </td>
+
+        <!-- Actions -->
+        <td>
+          <div class="flex items-center justify-center gap-2">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-text p-button-info p-button-sm"
+              pTooltip="View Details"
+              tooltipPosition="top"
+              (click)="viewDetails(guest)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-text p-button-warning p-button-sm"
+              pTooltip="Edit"
+              tooltipPosition="top"
+              (click)="editGuest(guest)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-danger p-button-sm"
+              pTooltip="Delete"
+              tooltipPosition="top"
+              (click)="deleteGuest(guest)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center py-8">
+          <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
+          <p class="text-gray-600 font-medium">No guests found</p>
+          <p class="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Custom Pagination -->
+  <div
+    class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
+  >
+    <p class="text-sm text-gray-600">
+      Showing {{ (currentPage() - 1) * pageSize() + 1 }} to
+      {{ min(currentPage() * pageSize(), totalItems()) }} of
+      {{ totalItems() }} results
+    </p>
+
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        type="button"
+        label="Previous"
+        icon="pi pi-chevron-left"
+        class="p-button-sm p-button-outlined"
+        [disabled]="currentPage() === 1"
+        (click)="onPageChange(currentPage() - 1)"
+      ></button>
+
+      <button
+        *ngFor="let page of [].constructor(min(totalPages(), 5)); let i = index"
+        pButton
+        type="button"
+        [label]="(i + 1).toString()"
+        class="p-button-sm"
+        [ngClass]="{
+          'p-button-warning': currentPage() === i + 1,
+          'p-button-outlined': currentPage() !== i + 1
+        }"
+        (click)="onPageChange(i + 1)"
+      ></button>
+
+      <button
+        pButton
+        type="button"
+        label="Next"
+        icon="pi pi-chevron-right"
+        iconPos="right"
+        class="p-button-sm p-button-outlined"
+        [disabled]="currentPage() >= totalPages()"
+        (click)="onPageChange(currentPage() + 1)"
+      ></button>
+    </div>
+  </div>
+</div>
