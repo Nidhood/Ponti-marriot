@@ -7,6 +7,8 @@ import {
   Output,
 } from '@angular/core';
 import { NgFor, NgIf, NgOptimizedImage } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+import { Router } from '@angular/router';
 
 export interface NavLink {
   label: string;
@@ -17,12 +19,12 @@ export interface NavLink {
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [NgFor, NgIf, NgOptimizedImage],
+  imports: [NgFor, NgIf, NgOptimizedImage, ButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
-  @HostBinding('class') host = 'block sticky top-0 z-50';
+  @HostBinding('class') host = 'block fixed top-0 left-0 right-0 z-50';
   @Input() logoSrc = '';
   @Input() logoAlt = 'Logo';
   @Input() navLinks: NavLink[] = [];
@@ -32,7 +34,17 @@ export class HeaderComponent {
   @Output() ctaClicked = new EventEmitter<void>();
 
   mobileOpen = false;
+
+  constructor(private router: Router) {}
+
   toggleMobile() {
     this.mobileOpen = !this.mobileOpen;
+  }
+
+  onCtaClick() {
+    this.ctaClicked.emit();
+    if (this.ctaHref) {
+      this.router.navigate([this.ctaHref]);
+    }
   }
 }

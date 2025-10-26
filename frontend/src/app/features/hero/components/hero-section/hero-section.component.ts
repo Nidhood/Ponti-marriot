@@ -6,7 +6,9 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { NgIf, NgOptimizedImage } from '@angular/common';
+import { NgIf, NgOptimizedImage, NgFor } from '@angular/common'; // 👈 Agregar NgFor aquí
+import { ButtonModule } from 'primeng/button';
+import { Router } from '@angular/router';
 
 export interface HeroAction {
   label: string;
@@ -14,10 +16,15 @@ export interface HeroAction {
   ariaLabel?: string;
 }
 
+export interface Brand {
+  name: string;
+  logo: string;
+}
+
 @Component({
   standalone: true,
   selector: 'app-hero-section',
-  imports: [NgIf, NgOptimizedImage],
+  imports: [NgIf, NgOptimizedImage, ButtonModule, NgFor],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './hero-section.component.html',
 })
@@ -27,6 +34,17 @@ export class HeroSectionComponent {
   @Input() title = '';
   @Input() subtitle = '';
   @Input() action?: HeroAction;
-  @Input() minHeightClass = 'min-h-[80vh] md:min-h-[88vh]';
+  @Input() minHeightClass = 'min-h-screen';
+  @Input() brands: Brand[] = [];
+  @Input() brandsTitle = '';
   @Output() actionClick = new EventEmitter<void>();
+
+  constructor(private router: Router) {}
+
+  onActionClick() {
+    this.actionClick.emit();
+    if (this.action?.href) {
+      this.router.navigate([this.action.href]);
+    }
+  }
 }
