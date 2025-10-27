@@ -1,5 +1,3 @@
-// src/app/features/dashboard/components/dashboard-guests/dashboard-guests.component.ts
-
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,11 +8,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG Imports
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
+import { Select } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -26,7 +22,6 @@ import {
   Guest,
   GuestStats,
   GuestStatus,
-  LoyaltyTier,
   GuestFilters,
   PaginationData,
 } from '../../models/guest.model';
@@ -43,10 +38,9 @@ interface DropdownOption {
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
+    Select,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
@@ -56,9 +50,112 @@ interface DropdownOption {
   providers: [ConfirmationService, MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard-guests.component.html',
+  styles: [
+    `
+      :host ::ng-deep {
+        /* Estilos para Select (Dropdown) */
+        .custom-dropdown .p-select {
+          width: 100%;
+          height: 42px;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          background-color: white !important;
+          display: flex;
+          align-items: center;
+        }
+
+        .custom-dropdown .p-select:hover {
+          border-color: #9ca3af;
+        }
+
+        .custom-dropdown .p-select-label {
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #374151;
+          line-height: 1.25rem;
+        }
+
+        .custom-dropdown .p-select-dropdown {
+          width: 2.5rem;
+          color: #6b7280;
+        }
+
+        .custom-dropdown .p-select:not(.p-disabled):focus,
+        .custom-dropdown .p-select:not(.p-disabled).p-focus {
+          outline: none;
+          border-color: #f59e0b;
+          box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Panel del dropdown */
+        .p-select-overlay {
+          background: white !important;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          margin-top: 0.25rem;
+          z-index: 1100;
+        }
+
+        .p-select-list-container {
+          background: white !important;
+        }
+
+        .p-select-list {
+          padding: 0.25rem;
+        }
+
+        .p-select-option {
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #374151;
+          border-radius: 0.375rem;
+          margin: 0.125rem 0;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .p-select-option:hover {
+          background-color: #f3f4f6 !important;
+        }
+
+        .p-select-option.p-select-option-selected {
+          background-color: #fef3c7 !important;
+          color: #92400e;
+          font-weight: 500;
+        }
+
+        /* Toast messages */
+        .p-toast .p-toast-message {
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Confirm dialog */
+        .p-dialog {
+          border-radius: 0.75rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .p-dialog .p-dialog-header {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .p-dialog .p-dialog-content {
+          padding: 1.5rem;
+        }
+
+        .p-dialog .p-dialog-footer {
+          padding: 1rem 1.5rem;
+          border-top: 1px solid #e5e7eb;
+        }
+      }
+    `,
+  ],
 })
 export class DashboardGuestsComponent implements OnInit {
-  // Stats
   stats = signal<GuestStats>({
     totalGuests: 0,
     activeGuests: 0,
@@ -66,22 +163,18 @@ export class DashboardGuestsComponent implements OnInit {
     newToday: 0,
   });
 
-  // Table Data
   guests = signal<Guest[]>([]);
   loading = signal(false);
 
-  // Filters
   searchTerm = signal('');
   selectedStatus = signal<string>('all');
   selectedRoomType = signal<string>('all');
 
-  // Pagination
   currentPage = signal(1);
   pageSize = signal(10);
   totalItems = signal(0);
   totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
-  // Dropdown Options
   statusOptions: DropdownOption[] = [
     { label: 'All Status', value: 'all' },
     { label: 'VIP Active', value: GuestStatus.VIP_ACTIVE },
@@ -100,7 +193,6 @@ export class DashboardGuestsComponent implements OnInit {
     { label: 'Deluxe Room', value: 'Deluxe Room' },
   ];
 
-  // Dialog
   selectedGuest = signal<Guest | null>(null);
   showDetailDialog = signal(false);
 
@@ -154,8 +246,10 @@ export class DashboardGuestsComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
-    this.currentPage.set(page);
-    this.loadGuests();
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadGuests();
+    }
   }
 
   clearFilters(): void {
@@ -166,8 +260,38 @@ export class DashboardGuestsComponent implements OnInit {
     this.loadGuests();
   }
 
-  applyFilters(): void {
-    this.onFilterChange();
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (current > 3) {
+        pages.push(-1);
+      }
+
+      for (
+        let i = Math.max(2, current - 1);
+        i <= Math.min(total - 1, current + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+
+      if (current < total - 2) {
+        pages.push(-1);
+      }
+
+      pages.push(total);
+    }
+
+    return pages;
   }
 
   viewDetails(guest: Guest): void {
@@ -206,21 +330,17 @@ export class DashboardGuestsComponent implements OnInit {
     });
   }
 
-  getStatusSeverity(
-    status: GuestStatus
-  ): 'success' | 'info' | 'warning' | 'danger' {
-    const severityMap: Record<
-      GuestStatus,
-      'success' | 'info' | 'warning' | 'danger'
-    > = {
-      [GuestStatus.VIP_ACTIVE]: 'success',
-      [GuestStatus.ACTIVE]: 'info',
-      [GuestStatus.NEW]: 'warning',
-      [GuestStatus.CHECKED_OUT]: 'warning',
-      [GuestStatus.CANCELLED]: 'danger',
-      [GuestStatus.BLACKLISTED]: 'danger',
-    };
-    return severityMap[status];
+  exportData(): void {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export',
+      detail: 'Exporting guests data...',
+      life: 3000,
+    });
+  }
+
+  printTable(): void {
+    window.print();
   }
 
   formatDate(date: Date): string {
@@ -237,18 +357,25 @@ export class DashboardGuestsComponent implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status.toLowerCase()) {
-      case 'checked_in':
-      case 'active':
-        return 'bg-green-100 text-green-700';
-      case 'checked_out':
-      case 'completed':
-        return 'bg-gray-100 text-gray-700';
+      case 'vip_active':
+      case 'vip active':
       case 'vip':
         return 'bg-yellow-100 text-yellow-700';
+      case 'active':
+      case 'checked_in':
+        return 'bg-green-100 text-green-700';
+      case 'new':
+        return 'bg-blue-100 text-blue-700';
+      case 'checked_out':
+      case 'checked out':
+      case 'completed':
+        return 'bg-gray-100 text-gray-700';
+      case 'cancelled':
       case 'canceled':
+      case 'blacklisted':
         return 'bg-red-100 text-red-700';
       default:
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-gray-50 text-gray-600';
     }
   }
 }

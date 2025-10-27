@@ -1,5 +1,3 @@
-// src/app/features/dashboard/components/dashboard-reservations/dashboard-reservations.component.ts
-
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,12 +8,10 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG Imports
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -44,11 +40,10 @@ interface DropdownOption {
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
-    DropdownModule,
-    CalendarModule,
+    Select,
+    DatePicker,
     TagModule,
     TooltipModule,
     ConfirmDialogModule,
@@ -58,9 +53,202 @@ interface DropdownOption {
   providers: [ConfirmationService, MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard-reservations.component.html',
+  styles: [
+    `
+      :host ::ng-deep {
+        /* Estilos para Select (Dropdown) */
+        .custom-dropdown .p-select {
+          width: 100%;
+          height: 42px;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          background-color: white !important;
+          display: flex;
+          align-items: center;
+        }
+
+        .custom-dropdown .p-select:hover {
+          border-color: #9ca3af;
+        }
+
+        .custom-dropdown .p-select-label {
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #374151;
+          line-height: 1.25rem;
+        }
+
+        .custom-dropdown .p-select-dropdown {
+          width: 2.5rem;
+          color: #6b7280;
+        }
+
+        .custom-dropdown .p-select:not(.p-disabled):focus,
+        .custom-dropdown .p-select:not(.p-disabled).p-focus {
+          outline: none;
+          border-color: #f59e0b;
+          box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Panel del dropdown */
+        .p-select-overlay {
+          background: white !important;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          margin-top: 0.25rem;
+          z-index: 1100;
+        }
+
+        .p-select-list-container {
+          background: white !important;
+        }
+
+        .p-select-list {
+          padding: 0.25rem;
+        }
+
+        .p-select-option {
+          padding: 0.625rem 0.75rem;
+          font-size: 0.875rem;
+          color: #374151;
+          border-radius: 0.375rem;
+          margin: 0.125rem 0;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .p-select-option:hover {
+          background-color: #f3f4f6 !important;
+        }
+
+        .p-select-option.p-select-option-selected {
+          background-color: #fef3c7 !important;
+          color: #92400e;
+          font-weight: 500;
+        }
+
+        /* Estilos para DatePicker */
+        .custom-datepicker .p-datepicker {
+          width: 100%;
+        }
+
+        .custom-datepicker .p-datepicker-input-icon-container {
+          position: relative;
+        }
+
+        .custom-datepicker input {
+          width: 100%;
+          height: 42px;
+          padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          color: #374151;
+          background-color: white !important;
+        }
+
+        .custom-datepicker input:hover {
+          border-color: #9ca3af;
+        }
+
+        .custom-datepicker input:focus {
+          outline: none;
+          border-color: #f59e0b;
+          box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+        }
+
+        .custom-datepicker .p-datepicker-dropdown,
+        .custom-datepicker .p-datepicker-trigger {
+          position: absolute;
+          right: 0.5rem;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6b7280;
+          background: transparent;
+          border: none;
+        }
+
+        /* Panel del datepicker */
+        .p-datepicker {
+          background: white !important;
+          border: 1px solid #e5e7eb;
+          border-radius: 0.5rem;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          padding: 1rem;
+        }
+
+        .p-datepicker .p-datepicker-header {
+          background: white;
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .p-datepicker table {
+          margin: 0;
+        }
+
+        .p-datepicker table td {
+          padding: 0.25rem;
+        }
+
+        .p-datepicker table td > span {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 0.375rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .p-datepicker table td > span:hover {
+          background-color: #f3f4f6;
+        }
+
+        .p-datepicker table td > span.p-datepicker-today > span {
+          background-color: #fef3c7;
+          color: #92400e;
+          font-weight: 600;
+        }
+
+        .p-datepicker table td > span.p-datepicker-selected {
+          background-color: #f59e0b !important;
+          color: white !important;
+        }
+
+        /* Toast messages */
+        .p-toast .p-toast-message {
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Confirm dialog */
+        .p-dialog {
+          border-radius: 0.75rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .p-dialog .p-dialog-header {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .p-dialog .p-dialog-content {
+          padding: 1.5rem;
+        }
+
+        .p-dialog .p-dialog-footer {
+          padding: 1rem 1.5rem;
+          border-top: 1px solid #e5e7eb;
+        }
+      }
+    `,
+  ],
 })
 export class DashboardReservationsComponent implements OnInit {
-  // Stats
   stats = signal<ReservationStats>({
     totalReservations: 0,
     checkInsToday: 0,
@@ -72,23 +260,19 @@ export class DashboardReservationsComponent implements OnInit {
     revenueChange: '',
   });
 
-  // Table Data
   reservations = signal<Reservation[]>([]);
   loading = signal(false);
 
-  // Filters
   searchTerm = signal('');
   selectedStatus = signal<string>('all');
   selectedRoomType = signal<string>('all');
   dateRange = signal<Date[] | null>(null);
 
-  // Pagination
   currentPage = signal(1);
   pageSize = signal(10);
   totalItems = signal(0);
   totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
 
-  // Dropdown Options
   statusOptions: DropdownOption[] = [
     { label: 'All Status', value: 'all' },
     { label: 'Confirmed', value: ReservationStatus.CONFIRMED },
@@ -110,7 +294,6 @@ export class DashboardReservationsComponent implements OnInit {
     { label: 'Presidential Suite', value: RoomType.PRESIDENTIAL },
   ];
 
-  // Dialog
   selectedReservation = signal<Reservation | null>(null);
   showDetailDialog = signal(false);
 
@@ -174,8 +357,10 @@ export class DashboardReservationsComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
-    this.currentPage.set(page);
-    this.loadReservations();
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadReservations();
+    }
   }
 
   clearFilters(): void {
@@ -185,6 +370,44 @@ export class DashboardReservationsComponent implements OnInit {
     this.dateRange.set(null);
     this.currentPage.set(1);
     this.loadReservations();
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+
+    if (total <= 7) {
+      // Show all pages if total is 7 or less
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (current > 3) {
+        pages.push(-1); // Ellipsis
+      }
+
+      // Show pages around current page
+      for (
+        let i = Math.max(2, current - 1);
+        i <= Math.min(total - 1, current + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+
+      if (current < total - 2) {
+        pages.push(-1); // Ellipsis
+      }
+
+      // Always show last page
+      pages.push(total);
+    }
+
+    return pages;
   }
 
   viewDetails(reservation: Reservation): void {
@@ -199,7 +422,6 @@ export class DashboardReservationsComponent implements OnInit {
       detail: `Editing reservation ${reservation.reservationNumber}`,
       life: 3000,
     });
-    // Implement edit logic
   }
 
   deleteReservation(reservation: Reservation): void {
@@ -247,29 +469,10 @@ export class DashboardReservationsComponent implements OnInit {
       detail: 'Exporting reservations data...',
       life: 3000,
     });
-    // Implement export logic
   }
 
   printTable(): void {
     window.print();
-  }
-
-  getStatusSeverity(
-    status: ReservationStatus
-  ): 'success' | 'info' | 'warning' | 'danger' {
-    const severityMap: Record<
-      ReservationStatus,
-      'success' | 'info' | 'warning' | 'danger'
-    > = {
-      [ReservationStatus.CONFIRMED]: 'success',
-      [ReservationStatus.CHECK_IN]: 'info',
-      [ReservationStatus.CHECK_OUT]: 'warning',
-      [ReservationStatus.PENDING]: 'warning',
-      [ReservationStatus.COMPLETED]: 'success',
-      [ReservationStatus.CANCELLED]: 'danger',
-      [ReservationStatus.NO_SHOW]: 'danger',
-    };
-    return severityMap[status];
   }
 
   formatDate(date: Date): string {
@@ -295,6 +498,7 @@ export class DashboardReservationsComponent implements OnInit {
     switch (status) {
       case 'checked_in':
       case 'Check-in':
+      case 'Confirmed':
         return 'bg-green-100 text-green-700';
       case 'upcoming':
       case 'Pending':
@@ -304,6 +508,7 @@ export class DashboardReservationsComponent implements OnInit {
         return 'bg-gray-100 text-gray-700';
       case 'canceled':
       case 'Cancelled':
+      case 'No Show':
         return 'bg-red-100 text-red-700';
       default:
         return 'bg-gray-50 text-gray-600';

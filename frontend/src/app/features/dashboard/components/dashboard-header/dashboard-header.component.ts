@@ -21,12 +21,13 @@ interface User {
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent {
-  @Input() title = 'Dashboard';
-  @Input() subtitle = 'Resume of the platform';
+  @Input() title = 'Reservations Management';
+  @Input() subtitle = 'Manage and monitor all hotel reservations';
   @Input() currentUser: User = {
     name: 'Ramon Ridwan',
     role: 'Administrator',
-    avatar: '',
+    avatar: '/images/user-avatar-placeholder.png',
   };
+
   @Output() menuToggle = new EventEmitter<void>();
 }

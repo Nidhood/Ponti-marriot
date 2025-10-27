@@ -1,25 +1,21 @@
-import { Component, signal, computed, effect } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { DropdownModule } from 'primeng/dropdown';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
-
-interface HotelOption {
-  label: string;
-  value: string;
-  region: string;
-}
-
-interface RoomType {
-  id: string;
-  type: string;
-  description: string;
-  ratePerNight: number;
-  totalRooms: number;
-  available: number;
-  image: string;
-}
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 type RoomStatus = 'available' | 'occupied' | 'reserved' | 'maintenance';
 
@@ -32,33 +28,84 @@ interface Room {
   notes?: string;
   region: string;
   hotelId: string;
+  currentGuest?: string;
+  checkOutDate?: Date;
 }
 
-type ReservationStatus = 'upcoming' | 'checked_in' | 'checked_out' | 'canceled';
-
-interface ReservationRow {
+interface RoomType {
   id: string;
-  guest: string;
-  avatar?: string;
-  roomType: string;
-  room: string;
-  checkIn: string;
-  checkOut: string;
-  status: ReservationStatus;
-  total: number;
+  name: string;
+  description: string;
+  ratePerNight: number;
+}
+
+interface RoomStats {
+  totalRooms: number;
+  available: number;
+  occupied: number;
+  reserved: number;
+}
+
+interface HotelOption {
+  label: string;
+  value: string;
   region: string;
-  hotelId: string;
+}
+
+interface DropdownOption {
+  label: string;
+  value: string;
 }
 
 @Component({
-  selector: 'app-dashboard-rooms',
   standalone: true,
-  imports: [CommonModule, FormsModule, DropdownModule, TooltipModule],
+  selector: 'app-dashboard-rooms',
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    TooltipModule,
+    ConfirmDialogModule,
+    ToastModule,
+    DialogModule,
+  ],
+  providers: [ConfirmationService, MessageService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard-rooms.component.html',
 })
-export class DashboardRoomsComponent {
-  // --------- Datos base ---------
-  private _hotels = signal<HotelOption[]>([
+export class DashboardRoomsComponent implements OnInit {
+  // Room types definitions
+  private roomTypes: RoomType[] = [
+    {
+      id: 'standard',
+      name: 'Standard',
+      description: 'Basic room with queen bed',
+      ratePerNight: 280000,
+    },
+    {
+      id: 'double-deluxe',
+      name: 'Double Deluxe',
+      description: 'Two double beds',
+      ratePerNight: 420000,
+    },
+    {
+      id: 'suite-premium',
+      name: 'Suite Premium',
+      description: 'Suite with private lounge',
+      ratePerNight: 680000,
+    },
+    {
+      id: 'family',
+      name: 'Family Room',
+      description: 'Large room for families',
+      ratePerNight: 550000,
+    },
+  ];
+
+  // Hotels data
+  private hotelsData: HotelOption[] = [
     { label: 'Bogotá · Centro', value: 'bog-centro', region: 'Bogotá' },
     { label: 'Bogotá · Aeropuerto', value: 'bog-airport', region: 'Bogotá' },
     { label: 'Medellín · Poblado', value: 'med-poblado', region: 'Medellín' },
@@ -67,81 +114,52 @@ export class DashboardRoomsComponent {
       value: 'ctg-bocagrande',
       region: 'Cartagena',
     },
-  ]);
-
-  selectedRegionSig = signal<string>('Bogotá');
-
-  // signal interna y prop pública para ngModel
-  selectedHotelSig = signal<string>('bog-centro');
-  selectedHotel = this.selectedHotelSig(); // usado en [(ngModel)]
-
-  selectedStatus = 'all';
-  selectedRoomType = 'all';
-
-  statusOptions = [
-    { label: 'All Status', value: 'all' },
-    { label: 'Upcoming', value: 'upcoming' },
-    { label: 'Checked In', value: 'checked_in' },
-    { label: 'Checked Out', value: 'checked_out' },
-    { label: 'Canceled', value: 'canceled' },
   ];
 
-  roomTypeOptions = [
-    { label: 'All Types', value: 'all' },
-    { label: 'Standard', value: 'standard' },
-    { label: 'Double Deluxe', value: 'double-deluxe' },
-    { label: 'Suite Premium', value: 'suite-premium' },
-  ];
-
-  loadingSig = signal<boolean>(false);
-
-  // --------- Catálogo de tipos de habitación ---------
-  private _roomTypes = signal<RoomType[]>([
+  // Sample rooms data
+  private allRooms = signal<Room[]>([
     {
-      id: 'standard',
-      type: 'Standard',
-      description: 'Habitación básica con cama queen, Wi-Fi y escritorio.',
-      ratePerNight: 280000,
-      totalRooms: 34,
-      available: 12,
-      image:
-        'https://images.unsplash.com/photo-1600585154084-4e5fe7bd7f10?q=80&w=1200&auto=format',
+      id: 'room-101',
+      number: '101',
+      typeId: 'standard',
+      status: 'available',
+      floor: 1,
+      region: 'Bogotá',
+      hotelId: 'bog-centro',
     },
     {
-      id: 'double-deluxe',
-      type: 'Double Deluxe',
-      description:
-        'Dos camas dobles, vista interna, ideal para familias o grupos.',
-      ratePerNight: 420000,
-      totalRooms: 18,
-      available: 4,
-      image:
-        'https://images.unsplash.com/photo-1613977251244-4621bd06e74f?q=80&w=1200&auto=format',
+      id: 'room-102',
+      number: '102',
+      typeId: 'standard',
+      status: 'occupied',
+      floor: 1,
+      region: 'Bogotá',
+      hotelId: 'bog-centro',
+      currentGuest: 'María López',
+      checkOutDate: new Date('2025-10-30'),
     },
     {
-      id: 'suite-premium',
-      type: 'Suite Premium',
-      description:
-        'Suite con sala privada, minibar y balcón. Opción ejecutiva.',
-      ratePerNight: 680000,
-      totalRooms: 6,
-      available: 1,
-      image:
-        'https://images.unsplash.com/photo-1600585154174-2accb932b0d7?q=80&w=1200&auto=format',
+      id: 'room-201',
+      number: '201',
+      typeId: 'double-deluxe',
+      status: 'reserved',
+      floor: 2,
+      region: 'Bogotá',
+      hotelId: 'bog-centro',
+      currentGuest: 'Juan Martínez',
+      checkOutDate: new Date('2025-10-29'),
     },
-  ]);
-
-  // inventario habitaciones
-  private _rooms = signal<Room[]>([
     {
       id: 'room-305',
       number: '305',
       typeId: 'double-deluxe',
       status: 'occupied',
       floor: 3,
-      notes: 'Cliente corporativo, checkout 28 Oct',
+      notes: 'Cliente corporativo',
       region: 'Bogotá',
       hotelId: 'bog-centro',
+      currentGuest: 'Camila Ortega',
+      checkOutDate: new Date('2025-10-28'),
     },
     {
       id: 'room-306',
@@ -149,7 +167,15 @@ export class DashboardRoomsComponent {
       typeId: 'double-deluxe',
       status: 'reserved',
       floor: 3,
-      notes: 'Check-in 27 Oct 15:00',
+      region: 'Bogotá',
+      hotelId: 'bog-centro',
+    },
+    {
+      id: 'room-401',
+      number: '401',
+      typeId: 'suite-premium',
+      status: 'available',
+      floor: 4,
       region: 'Bogotá',
       hotelId: 'bog-centro',
     },
@@ -159,7 +185,6 @@ export class DashboardRoomsComponent {
       typeId: 'suite-premium',
       status: 'available',
       floor: 12,
-      notes: 'Listo, housekeeping OK',
       region: 'Bogotá',
       hotelId: 'bog-airport',
     },
@@ -172,238 +197,267 @@ export class DashboardRoomsComponent {
       region: 'Medellín',
       hotelId: 'med-poblado',
     },
-  ]);
-
-  // reservas (tabla)
-  private _reservations = signal<ReservationRow[]>([
     {
-      id: 'res-1001',
-      guest: 'Camila Ortega',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Camila%20Ortega',
-      roomType: 'Double Deluxe',
-      room: '305',
-      checkIn: '2025-10-25',
-      checkOut: '2025-10-28',
-      status: 'checked_in',
-      total: 840000,
-      region: 'Bogotá',
-      hotelId: 'bog-centro',
-    },
-    {
-      id: 'res-1002',
-      guest: 'Juan Martínez',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Juan%20Martinez',
-      roomType: 'Double Deluxe',
-      room: '306',
-      checkIn: '2025-10-27',
-      checkOut: '2025-10-29',
-      status: 'upcoming',
-      total: 560000,
-      region: 'Bogotá',
-      hotelId: 'bog-centro',
-    },
-    {
-      id: 'res-1003',
-      guest: 'María López',
-      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Maria%20Lopez',
-      roomType: 'Suite Premium',
-      room: '1208',
-      checkIn: '2025-10-20',
-      checkOut: '2025-10-23',
-      status: 'checked_out',
-      total: 2040000,
-      region: 'Bogotá',
-      hotelId: 'bog-airport',
-    },
-    {
-      id: 'res-1004',
-      guest: 'Daniel Herrera',
-      roomType: 'Standard',
-      room: '504',
-      checkIn: '2025-10-24',
-      checkOut: '2025-10-26',
-      status: 'checked_in',
-      total: 560000,
+      id: 'room-505',
+      number: '505',
+      typeId: 'family',
+      status: 'occupied',
+      floor: 5,
       region: 'Medellín',
       hotelId: 'med-poblado',
+      currentGuest: 'Daniel Herrera',
+      checkOutDate: new Date('2025-10-31'),
+    },
+    {
+      id: 'room-301',
+      number: '301',
+      typeId: 'double-deluxe',
+      status: 'maintenance',
+      floor: 3,
+      region: 'Cartagena',
+      hotelId: 'ctg-bocagrande',
+      notes: 'AC repair scheduled',
     },
   ]);
 
-  // --------- Computed (UI) ---------
-
-  hotelOptions = computed(() => {
-    const region = this.selectedRegionSig();
-    return this._hotels().filter((h) => h.region === region);
+  stats = signal<RoomStats>({
+    totalRooms: 0,
+    available: 0,
+    occupied: 0,
+    reserved: 0,
   });
 
-  // Cards KPI arriba
-  stats = computed(() => {
-    const hotelId = this.selectedHotelSig();
-    const roomsInHotel = this._rooms().filter((r) => r.hotelId === hotelId);
+  loading = signal(false);
 
-    const totalRooms = roomsInHotel.length;
-    const available = roomsInHotel.filter(
-      (r) => r.status === 'available'
-    ).length;
-    const occupied = roomsInHotel.filter((r) => r.status === 'occupied').length;
+  searchTerm = signal('');
+  selectedRegion = signal<string>('all');
+  selectedHotel = signal<string>('all');
+  selectedStatus = signal<string>('all');
+  selectedRoomType = signal<string>('all');
 
-    // tarifa promedio
-    let acc = 0;
-    let n = 0;
-    for (const r of roomsInHotel) {
-      const t = this._roomTypes().find((rt) => rt.id === r.typeId);
-      if (t) {
-        acc += t.ratePerNight;
-        n++;
-      }
+  currentPage = signal(1);
+  pageSize = signal(10);
+  totalItems = computed(() => this.filteredRoomsCount());
+  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
+
+  regionOptions: DropdownOption[] = [
+    { label: 'All Regions', value: 'all' },
+    { label: 'Bogotá', value: 'Bogotá' },
+    { label: 'Medellín', value: 'Medellín' },
+    { label: 'Cartagena', value: 'Cartagena' },
+  ];
+
+  hotelOptions = computed(() => {
+    const region = this.selectedRegion();
+    if (region === 'all') {
+      return [{ label: 'All Hotels', value: 'all' }, ...this.hotelsData];
     }
-    const avgRate = n > 0 ? acc / n : 0;
-
     return [
-      {
-        title: 'Total Rooms',
-        value: totalRooms,
-        trend: 'up',
-        change: '+2%',
-        icon: 'building',
-        iconColor: 'bg-blue-100 text-blue-600',
-      },
-      {
-        title: 'Available',
-        value: available,
-        trend: 'up',
-        change: '+5%',
-        icon: 'check-circle',
-        iconColor: 'bg-green-100 text-green-600',
-      },
-      {
-        title: 'Occupied',
-        value: occupied,
-        trend: 'down',
-        change: '-1%',
-        icon: 'home',
-        iconColor: 'bg-yellow-100 text-yellow-600',
-      },
-      {
-        title: 'Avg. Rate/Night',
-        value: this.formatCurrency(avgRate),
-        trend: 'up',
-        change: '+3%',
-        icon: 'currency',
-        iconColor: 'bg-purple-100 text-purple-600',
-      },
+      { label: 'All Hotels', value: 'all' },
+      ...this.hotelsData.filter((h) => h.region === region),
     ];
   });
 
-  roomTypeStats = computed(() => this._roomTypes());
+  statusOptions: DropdownOption[] = [
+    { label: 'All Status', value: 'all' },
+    { label: 'Available', value: 'available' },
+    { label: 'Occupied', value: 'occupied' },
+    { label: 'Reserved', value: 'reserved' },
+    { label: 'Maintenance', value: 'maintenance' },
+  ];
 
-  // Reservas filtradas por hotel / status / type
-  reservations = computed(() => {
-    const h = this.selectedHotelSig();
-    const statusFilter = this.selectedStatus;
-    const typeFilter = this.selectedRoomType;
+  roomTypeOptions: DropdownOption[] = [
+    { label: 'All Room Types', value: 'all' },
+    { label: 'Standard', value: 'standard' },
+    { label: 'Double Deluxe', value: 'double-deluxe' },
+    { label: 'Suite Premium', value: 'suite-premium' },
+    { label: 'Family Room', value: 'family' },
+  ];
 
-    return this._reservations().filter((r) => {
-      if (r.hotelId !== h) return false;
-      if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+  selectedRoom = signal<Room | null>(null);
+  showDetailDialog = signal(false);
 
-      if (typeFilter !== 'all') {
-        const normalizedType = r.roomType.toLowerCase().replace(/\s+/g, '-');
-        if (normalizedType !== typeFilter) return false;
+  // Computed rooms with filters applied
+  rooms = computed(() => {
+    let filtered = this.allRooms();
+
+    // Filter by search term
+    const search = this.searchTerm().toLowerCase();
+    if (search) {
+      filtered = filtered.filter(
+        (room) =>
+          room.number.toLowerCase().includes(search) ||
+          this.getRoomTypeName(room.typeId).toLowerCase().includes(search) ||
+          (room.currentGuest &&
+            room.currentGuest.toLowerCase().includes(search))
+      );
+    }
+
+    // Filter by region
+    if (this.selectedRegion() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.region === this.selectedRegion()
+      );
+    }
+
+    // Filter by hotel
+    if (this.selectedHotel() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.hotelId === this.selectedHotel()
+      );
+    }
+
+    // Filter by status
+    if (this.selectedStatus() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.status === this.selectedStatus()
+      );
+    }
+
+    // Filter by room type
+    if (this.selectedRoomType() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.typeId === this.selectedRoomType()
+      );
+    }
+
+    // Apply pagination
+    const start = (this.currentPage() - 1) * this.pageSize();
+    const end = start + this.pageSize();
+
+    return filtered.slice(start, end);
+  });
+
+  // Computed total items (separated from rooms to avoid signal writing in computed)
+  filteredRoomsCount = computed(() => {
+    let filtered = this.allRooms();
+
+    const search = this.searchTerm().toLowerCase();
+    if (search) {
+      filtered = filtered.filter(
+        (room) =>
+          room.number.toLowerCase().includes(search) ||
+          this.getRoomTypeName(room.typeId).toLowerCase().includes(search) ||
+          (room.currentGuest &&
+            room.currentGuest.toLowerCase().includes(search))
+      );
+    }
+
+    if (this.selectedRegion() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.region === this.selectedRegion()
+      );
+    }
+
+    if (this.selectedHotel() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.hotelId === this.selectedHotel()
+      );
+    }
+
+    if (this.selectedStatus() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.status === this.selectedStatus()
+      );
+    }
+
+    if (this.selectedRoomType() !== 'all') {
+      filtered = filtered.filter(
+        (room) => room.typeId === this.selectedRoomType()
+      );
+    }
+
+    return filtered.length;
+  });
+
+  constructor(
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadStats();
+  }
+
+  private loadStats(): void {
+    const rooms = this.allRooms();
+
+    this.stats.set({
+      totalRooms: rooms.length,
+      available: rooms.filter((r) => r.status === 'available').length,
+      occupied: rooms.filter((r) => r.status === 'occupied').length,
+      reserved: rooms.filter((r) => r.status === 'reserved').length,
+    });
+  }
+
+  onFilterChange(): void {
+    this.currentPage.set(1);
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.selectedRegion.set('all');
+    this.selectedHotel.set('all');
+    this.selectedStatus.set('all');
+    this.selectedRoomType.set('all');
+    this.currentPage.set(1);
+  }
+
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (current > 3) {
+        pages.push(-1);
       }
 
-      return true;
-    });
-  });
+      for (
+        let i = Math.max(2, current - 1);
+        i <= Math.min(total - 1, current + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
 
-  // paginación
-  currentPageSig = signal<number>(1);
-  pageSize = 10;
+      if (current < total - 2) {
+        pages.push(-1);
+      }
 
-  currentPage = () => this.currentPageSig();
-  totalResults = computed(() => this.reservations().length);
+      pages.push(total);
+    }
 
-  getTotalPages(): number {
-    const total = this.totalResults();
-    if (total === 0) return 1;
-    return Math.ceil(total / this.pageSize);
+    return pages;
   }
 
-  pageRange() {
-    // devuelve [1,2,...,N] para iterar en el template
-    const totalPages = this.getTotalPages();
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  // Helper methods
+  getRoomTypeName(typeId: string): string {
+    return this.roomTypes.find((t) => t.id === typeId)?.name || typeId;
   }
 
-  paginatedReservations = computed(() => {
-    const page = this.currentPageSig();
-    const start = (page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    return this.reservations().slice(start, end);
-  });
+  getRoomTypeDescription(typeId: string): string {
+    return this.roomTypes.find((t) => t.id === typeId)?.description || 'Room';
+  }
 
-  // guest stats / wallet / room stats (para las secciones inferiores)
-  guestStats = signal([
-    {
-      title: 'Total Guests',
-      value: 128,
-      icon: 'users',
-      iconColor: 'bg-blue-100 text-blue-600',
-    },
-    {
-      title: 'Checked In',
-      value: 42,
-      icon: 'user-check',
-      iconColor: 'bg-green-100 text-green-600',
-    },
-    {
-      title: 'VIP / Loyalty',
-      value: 9,
-      icon: 'crown',
-      iconColor: 'bg-yellow-100 text-yellow-600',
-    },
-    {
-      title: 'New Today',
-      value: 6,
-      icon: 'user-plus',
-      iconColor: 'bg-purple-100 text-purple-600',
-    },
-  ]);
+  getRoomRate(typeId: string): number {
+    return this.roomTypes.find((t) => t.id === typeId)?.ratePerNight || 0;
+  }
 
-  walletEarnings = signal<number>(12500000);
-  walletBalance = signal<number>(3200000);
-
-  roomStats = signal([
-    {
-      title: 'Total Rooms',
-      value: 58,
-      icon: 'building',
-      iconColor: 'bg-blue-100 text-blue-600',
-    },
-    {
-      title: 'Available Now',
-      value: 17,
-      icon: 'check-circle',
-      iconColor: 'bg-green-100 text-green-600',
-    },
-    {
-      title: 'Currently Occupied',
-      value: 36,
-      icon: 'home',
-      iconColor: 'bg-yellow-100 text-yellow-600',
-    },
-    {
-      title: 'Avg Rate/Night',
-      value: '420.000',
-      icon: 'currency',
-      iconColor: 'bg-purple-100 text-purple-600',
-    },
-  ]);
-
-  // --------- Helpers de UI ---------
-
-  min(a: number, b: number): number {
-    return a < b ? a : b;
+  getHotelName(hotelId: string): string {
+    return this.hotelsData.find((h) => h.value === hotelId)?.label || hotelId;
   }
 
   formatCurrency(value: number): string {
@@ -415,105 +469,121 @@ export class DashboardRoomsComponent {
     }).format(value);
   }
 
-  getStatusClass(status: ReservationStatus): string {
-    switch (status) {
-      case 'checked_in':
+  formatDate(date: Date): string {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(date));
+  }
+
+  min(a: number, b: number): number {
+    return Math.min(a, b);
+  }
+
+  getStatusClass(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'available':
         return 'bg-green-100 text-green-700';
-      case 'upcoming':
+      case 'occupied':
         return 'bg-blue-100 text-blue-700';
-      case 'checked_out':
-        return 'bg-gray-100 text-gray-700';
-      case 'canceled':
+      case 'reserved':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'maintenance':
         return 'bg-red-100 text-red-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
   }
 
-  changePage(page: number) {
-    if (page < 1) return;
-    if (page > this.getTotalPages()) return;
-    this.currentPageSig.set(page);
+  // CRUD Operations
+  viewDetails(room: Room): void {
+    this.selectedRoom.set(room);
+    this.showDetailDialog.set(true);
   }
 
-  // handlers dropdown
-  onHotelChange(newHotel: string) {
-    this.selectedHotelSig.set(newHotel);
-    this.syncLoadingPulse();
+  addRoom(): void {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Add Room',
+      detail: 'Opening room creation form...',
+      life: 3000,
+    });
+    // Here you would open a dialog or navigate to a form
   }
 
-  onStatusChange(newStatus: string) {
-    this.selectedStatus = newStatus;
-    this.syncLoadingPulse();
+  editRoom(room: Room): void {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Edit Room',
+      detail: `Editing room ${room.number}`,
+      life: 3000,
+    });
+    // Here you would open an edit dialog or form
   }
 
-  onRoomTypeChange(newType: string) {
-    this.selectedRoomType = newType;
-    this.syncLoadingPulse();
+  deleteRoom(room: Room): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to delete room ${room.number}?`,
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.allRooms.update((rooms) => rooms.filter((r) => r.id !== room.id));
+        this.loadStats();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'Room deleted successfully',
+          life: 3000,
+        });
+      },
+    });
   }
 
-  // cambiar región
-  changeRegion(region: string) {
-    this.selectedRegionSig.set(region);
-
-    // re-map hotel si cambia de región
-    const firstHotel = this.hotelOptions()[0];
-    if (firstHotel) {
-      this.selectedHotelSig.set(firstHotel.value);
-      this.selectedHotel = firstHotel.value;
-    }
-
-    this.syncLoadingPulse();
-  }
-
-  private syncLoadingPulse() {
-    this.loadingSig.set(true);
-    setTimeout(() => this.loadingSig.set(false), 200);
-  }
-
-  // CRUD demo
-  createRoom() {
-    console.log('createRoom()');
-  }
-
-  markAsAvailable(roomId: string) {
-    this._rooms.update((list) =>
-      list.map((r) => (r.id === roomId ? { ...r, status: 'available' } : r))
+  markAsAvailable(room: Room): void {
+    this.allRooms.update((rooms) =>
+      rooms.map((r) =>
+        r.id === room.id
+          ? {
+              ...r,
+              status: 'available' as RoomStatus,
+              currentGuest: undefined,
+              checkOutDate: undefined,
+            }
+          : r
+      )
     );
+    this.loadStats();
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Status Updated',
+      detail: `Room ${room.number} is now available`,
+      life: 3000,
+    });
   }
 
-  markAsOccupied(roomId: string) {
-    this._rooms.update((list) =>
-      list.map((r) => (r.id === roomId ? { ...r, status: 'occupied' } : r))
+  markAsOccupied(room: Room): void {
+    this.allRooms.update((rooms) =>
+      rooms.map((r) =>
+        r.id === room.id ? { ...r, status: 'occupied' as RoomStatus } : r
+      )
     );
+    this.loadStats();
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Status Updated',
+      detail: `Room ${room.number} is now occupied`,
+      life: 3000,
+    });
   }
 
-  markAsReserved(roomId: string) {
-    this._rooms.update((list) =>
-      list.map((r) => (r.id === roomId ? { ...r, status: 'reserved' } : r))
-    );
+  exportData(): void {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export',
+      detail: 'Exporting rooms data...',
+      life: 3000,
+    });
   }
-
-  deleteRoom(roomId: string) {
-    this._rooms.update((list) => list.filter((r) => r.id !== roomId));
-  }
-
-  viewRoomDetails(roomType: RoomType) {
-    console.log('viewRoomDetails()', roomType);
-  }
-
-  editRoom(roomType: RoomType) {
-    console.log('editRoom()', roomType);
-  }
-
-  _dbg = effect(() => {
-    console.log(
-      '[rooms-dashboard] hotel=',
-      this.selectedHotelSig(),
-      'region=',
-      this.selectedRegionSig(),
-      'reservationsFiltered=',
-      this.reservations().length
-    );
-  });
 }

@@ -4,10 +4,13 @@
   [navLinks]="navLinks"
   [ctaLabel]="'Get Started'"
   [ctaHref]="'/signup'"
+  (navClicked)="onNavSelect($event)"
+  (ctaClicked)="onNavSelect('/signup')"
 >
 </app-home-header>
 
 <app-home-hero
+  *ngIf="activeSection === 'home'"
   [backgroundUrl]="heroBg"
   [title]="heroTitle"
   [subtitle]="heroSubtitle"
@@ -16,6 +19,10 @@
   [brandsTitle]="brandsTitle"
 >
 </app-home-hero>
+
+<app-home-hotels *ngIf="activeSection === 'hotels'"></app-home-hotels>
+
+<app-home-about *ngIf="activeSection === 'about'"></app-home-about>
 
 <app-home-footer [groups]="footerGroups" [copyrightHolder]="'Ponti Marriot'">
 </app-home-footer>

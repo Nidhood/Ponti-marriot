@@ -18,6 +18,7 @@ import { DashboardRoomsComponent } from './components/dashboard-rooms/dashboard-
 import { DashboardGuestsComponent } from './components/dashboard-guests/dashboard-guests.component';
 import { DashboardPaymentsComponent } from './components/dashboard-payments/dashboard-payments.component';
 import { DashboardReportsComponent } from './components/dashboard-reports/dashboard-reports.component';
+import { SettingsComponent } from './components/dashboard-settings/dashboard-settings.component';
 
 type DashboardView =
   | 'overview'
@@ -41,6 +42,7 @@ type DashboardView =
     DashboardGuestsComponent,
     DashboardPaymentsComponent,
     DashboardReportsComponent,
+    SettingsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.component.html',
@@ -68,7 +70,7 @@ export class DashboardComponent implements OnInit {
     { id: 'reports', label: 'Reports', icon: 'reports', active: false },
     {
       id: 'account',
-      label: 'Account Settings',
+      label: 'Settings',
       icon: 'settings',
       active: false,
     },

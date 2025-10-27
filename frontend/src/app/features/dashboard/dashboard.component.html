@@ -38,13 +38,8 @@
       <!-- Reports Component -->
       <app-dashboard-reports *ngIf="isReports()"></app-dashboard-reports>
 
-      <!-- Account Component-->
-      <div *ngIf="isAccount()" class="text-center py-20">
-        <h2 class="text-2xl font-bold text-gray-900">
-          Account Settings Module
-        </h2>
-        <p class="text-gray-500 mt-2">Coming soon...</p>
-      </div>
+      <!-- Settings Component-->
+      <app-dashboard-settings *ngIf="isAccount()"></app-dashboard-settings>
     </main>
   </div>
 </div>
