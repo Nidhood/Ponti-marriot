@@ -234,4 +234,21 @@ export class DashboardGuestsComponent implements OnInit {
   min(a: number, b: number): number {
     return Math.min(a, b);
   }
+
+  getStatusClass(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'checked_in':
+      case 'active':
+        return 'bg-green-100 text-green-700';
+      case 'checked_out':
+      case 'completed':
+        return 'bg-gray-100 text-gray-700';
+      case 'vip':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'canceled':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-blue-100 text-blue-700';
+    }
+  }
 }

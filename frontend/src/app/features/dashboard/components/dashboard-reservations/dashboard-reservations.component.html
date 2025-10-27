@@ -1,120 +1,92 @@
-<!-- src/app/features/dashboard/components/dashboard-reservations/dashboard-reservations.component.html -->
-
 <div class="space-y-6">
-  <!-- Stats Cards -->
+  <!-- === Stats Cards === -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Total Reservations -->
     <div
+      *ngFor="
+        let card of [
+          {
+            title: 'Total Reservations',
+            value: stats().totalReservations,
+            change: stats().totalChange,
+            icon: 'pi-calendar',
+            color: 'blue'
+          },
+          {
+            title: 'Check-ins Today',
+            value: stats().checkInsToday,
+            change: stats().checkInPending + ' pending',
+            icon: 'pi-sign-in',
+            color: 'green'
+          },
+          {
+            title: 'Check-outs Today',
+            value: stats().checkOutsToday,
+            change: stats().checkOutOverdue + ' overdue',
+            icon: 'pi-sign-out',
+            color: 'red'
+          },
+          {
+            title: 'Revenue Today',
+            value: formatCurrency(stats().revenueToday),
+            change: stats().revenueChange,
+            icon: 'pi-dollar',
+            color: 'yellow'
+          }
+        ]
+      "
       class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
     >
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Total Reservations</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().totalReservations.toLocaleString() }}
-          </p>
-          <p class="text-xs mt-2 flex items-center gap-1 text-green-600">
+          <p class="text-sm font-medium text-gray-600">{{ card.title }}</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">{{ card.value }}</p>
+          <p
+            class="text-xs mt-2 flex items-center gap-1"
+            [ngClass]="{
+              'text-green-600':
+                card.color === 'green' || card.color === 'yellow',
+              'text-red-600': card.color === 'red'
+            }"
+          >
             <i class="pi pi-arrow-up text-xs"></i>
-            <span>{{ stats().totalChange }}</span>
+            <span>{{ card.change }}</span>
           </p>
         </div>
         <div
-          class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"
+          class="w-12 h-12 rounded-lg flex items-center justify-center"
+          [ngClass]="{
+            'bg-blue-100 text-blue-600': card.color === 'blue',
+            'bg-green-100 text-green-600': card.color === 'green',
+            'bg-red-100 text-red-600': card.color === 'red',
+            'bg-yellow-100 text-yellow-600': card.color === 'yellow'
+          }"
         >
-          <i class="pi pi-calendar text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Check-ins Today -->
-    <div
-      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-    >
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Check-ins Today</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().checkInsToday }}
-          </p>
-          <p class="text-xs mt-2 flex items-center gap-1 text-yellow-600">
-            <i class="pi pi-clock text-xs"></i>
-            <span>{{ stats().checkInPending }} pending</span>
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-sign-in text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Check-outs Today -->
-    <div
-      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-    >
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Check-outs Today</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().checkOutsToday }}
-          </p>
-          <p class="text-xs mt-2 flex items-center gap-1 text-red-600">
-            <i class="pi pi-exclamation-triangle text-xs"></i>
-            <span>{{ stats().checkOutOverdue }} overdue</span>
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-sign-out text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Revenue Today -->
-    <div
-      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-    >
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Revenue Today</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ formatCurrency(stats().revenueToday) }}
-          </p>
-          <p class="text-xs mt-2 flex items-center gap-1 text-green-600">
-            <i class="pi pi-arrow-up text-xs"></i>
-            <span>{{ stats().revenueChange }}</span>
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-dollar text-xl"></i>
+          <i [class]="card.icon + ' text-xl'"></i>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Filters and Actions -->
+  <!-- === Filters & Actions === -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <!-- Search -->
       <div class="lg:col-span-2">
-        <span class="p-input-icon-left w-full">
-          <i class="pi pi-search"></i>
+        <span class="relative w-full">
+          <i
+            class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          ></i>
           <input
-            pInputText
             type="text"
             placeholder="Search by guest, email, or reservation #"
-            class="w-full"
+            class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
             [(ngModel)]="searchTerm"
             (ngModelChange)="onFilterChange()"
           />
         </span>
       </div>
 
-      <!-- Status Filter -->
+      <!-- Status -->
       <div>
         <p-dropdown
           [options]="statusOptions"
@@ -122,13 +94,12 @@
           placeholder="All Status"
           optionLabel="label"
           optionValue="value"
-          [showClear]="false"
           styleClass="w-full"
           (onChange)="onFilterChange()"
         ></p-dropdown>
       </div>
 
-      <!-- Room Type Filter -->
+      <!-- Room Type -->
       <div>
         <p-dropdown
           [options]="roomTypeOptions"
@@ -136,7 +107,6 @@
           placeholder="All Room Types"
           optionLabel="label"
           optionValue="value"
-          [showClear]="false"
           styleClass="w-full"
           (onChange)="onFilterChange()"
         ></p-dropdown>
@@ -153,12 +123,11 @@
           [showIcon]="true"
           styleClass="w-full"
           (onSelect)="onFilterChange()"
-          (onClearClick)="onFilterChange()"
         ></p-calendar>
       </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Actions -->
     <div
       class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
     >
@@ -192,363 +161,175 @@
     </div>
   </div>
 
-  <!-- Reservations Table -->
+  <!-- === Reservations Table (Tailwind version) === -->
   <div
     class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
   >
-    <p-table
-      [value]="reservations()"
-      [loading]="loading()"
-      [paginator]="false"
-      [rows]="pageSize()"
-      styleClass="p-datatable-sm"
-      responsiveLayout="scroll"
-      [rowHover]="true"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th class="font-semibold text-gray-700">RESERVATION ID</th>
-          <th class="font-semibold text-gray-700">GUEST</th>
-          <th class="font-semibold text-gray-700">ROOM</th>
-          <th class="font-semibold text-gray-700">CHECK-IN</th>
-          <th class="font-semibold text-gray-700">CHECK-OUT</th>
-          <th class="font-semibold text-gray-700">STATUS</th>
-          <th class="font-semibold text-gray-700">TOTAL</th>
-          <th class="font-semibold text-gray-700 text-center">ACTIONS</th>
-        </tr>
-      </ng-template>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Reservation #
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Guest
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Room
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Check-in
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Check-out
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+              Status
+            </th>
+            <th
+              class="px-6 py-3 text-right text-xs font-semibold text-gray-600"
+            >
+              Total
+            </th>
+            <th
+              class="px-6 py-3 text-right text-xs font-semibold text-gray-600"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
 
-      <ng-template pTemplate="body" let-reservation>
-        <tr>
-          <!-- Reservation ID -->
-          <td>
-            <span class="text-sm font-medium text-gray-700">{{
-              reservation.reservationNumber
-            }}</span>
-          </td>
+        <tbody class="divide-y divide-gray-200">
+          <tr
+            *ngFor="let reservation of reservations()"
+            class="hover:bg-gray-50 transition-colors"
+          >
+            <td class="px-6 py-3 text-sm text-gray-700 font-medium">
+              {{ reservation.reservationNumber }}
+            </td>
 
-          <!-- Guest -->
-          <td>
-            <div class="flex items-center gap-3">
-              <img
-                [src]="
-                  reservation.guest.avatar ||
-                  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23cbd5e1%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E'
-                "
-                [alt]="reservation.guest.name"
-                class="w-10 h-10 rounded-full bg-gray-200 object-cover"
-              />
+            <td class="px-6 py-3 text-sm text-gray-700">
+              <div class="flex items-center gap-3">
+                <img
+                  [src]="
+                    reservation.guest.avatar ||
+                    'https://api.dicebear.com/7.x/initials/svg?seed=' +
+                      reservation.guest.name
+                  "
+                  class="w-10 h-10 rounded-full object-cover bg-gray-200"
+                />
+                <div>
+                  <p class="font-semibold text-gray-900">
+                    {{ reservation.guest.name }}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    {{ reservation.guest.email }}
+                  </p>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-6 py-3 text-sm text-gray-700">
               <div>
-                <p class="text-sm font-medium text-gray-900">
-                  {{ reservation.guest.name }}
+                <p class="font-semibold text-gray-900">
+                  {{ reservation.room.number }}
                 </p>
                 <p class="text-xs text-gray-500">
-                  {{ reservation.guest.email }}
+                  {{ reservation.room.type }}
                 </p>
               </div>
-            </div>
-          </td>
+            </td>
 
-          <!-- Room -->
-          <td>
-            <div>
-              <p class="text-sm font-medium text-gray-900">
-                {{ reservation.room.number }}
-              </p>
-              <p class="text-xs text-gray-500">{{ reservation.room.type }}</p>
-            </div>
-          </td>
+            <td class="px-6 py-3 text-sm text-gray-600">
+              {{ formatDate(reservation.checkIn) }}
+            </td>
 
-          <!-- Check-in -->
-          <td>
-            <span class="text-sm text-gray-700">{{
-              formatDate(reservation.checkIn)
-            }}</span>
-          </td>
+            <td class="px-6 py-3 text-sm text-gray-600">
+              {{ formatDate(reservation.checkOut) }}
+            </td>
 
-          <!-- Check-out -->
-          <td>
-            <span class="text-sm text-gray-700">{{
-              formatDate(reservation.checkOut)
-            }}</span>
-          </td>
+            <td class="px-6 py-3">
+              <span
+                class="px-3 py-1 text-xs font-semibold rounded-full"
+                [class]="getStatusClass(reservation.status)"
+              >
+                {{ reservation.status }}
+              </span>
+            </td>
 
-          <!-- Status -->
-          <td>
-            <p-tag
-              [value]="reservation.status"
-              [severity]="getStatusSeverity(reservation.status)"
-              [rounded]="true"
-            ></p-tag>
-          </td>
+            <td class="px-6 py-3 text-right text-sm font-bold text-gray-900">
+              {{ formatCurrency(reservation.total) }}
+            </td>
 
-          <!-- Total -->
-          <td>
-            <span class="text-sm font-semibold text-gray-900">{{
-              formatCurrency(reservation.total)
-            }}</span>
-          </td>
+            <td class="px-6 py-3 text-right">
+              <div class="flex justify-end gap-2">
+                <button
+                  pButton
+                  icon="pi pi-eye"
+                  class="p-button-rounded p-button-text p-button-info p-button-sm"
+                  (click)="viewDetails(reservation)"
+                ></button>
+                <button
+                  pButton
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-text p-button-warning p-button-sm"
+                  (click)="editReservation(reservation)"
+                ></button>
+                <button
+                  pButton
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  (click)="deleteReservation(reservation)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-          <!-- Actions -->
-          <td>
-            <div class="flex items-center justify-center gap-2">
-              <button
-                pButton
-                type="button"
-                icon="pi pi-eye"
-                class="p-button-rounded p-button-text p-button-info p-button-sm"
-                pTooltip="View Details"
-                tooltipPosition="top"
-                (click)="viewDetails(reservation)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                icon="pi pi-pencil"
-                class="p-button-rounded p-button-text p-button-warning p-button-sm"
-                pTooltip="Edit"
-                tooltipPosition="top"
-                (click)="editReservation(reservation)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                icon="pi pi-trash"
-                class="p-button-rounded p-button-text p-button-danger p-button-sm"
-                pTooltip="Delete"
-                tooltipPosition="top"
-                (click)="deleteReservation(reservation)"
-              ></button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="8" class="text-center py-8">
-            <i class="pi pi-inbox text-4xl text-gray-400 mb-4"></i>
-            <p class="text-gray-600 font-medium">No reservations found</p>
-            <p class="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-
-    <!-- Custom Pagination -->
+    <!-- Pagination footer -->
     <div
-      class="px-6 py-4 border-t border-gray-200 flex items-center justify-between"
+      class="px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between"
     >
       <p class="text-sm text-gray-600">
-        Showing {{ (currentPage() - 1) * pageSize() + 1 }} to
-        {{ min(currentPage() * pageSize(), totalItems()) }} of
-        {{ totalItems() }} results
+        Showing {{ (currentPage() - 1) * pageSize() + 1 }}
+        to
+        {{ min(currentPage() * pageSize(), totalItems()) }}
+        of
+        {{ totalItems() }}
+        results
       </p>
 
       <div class="flex items-center gap-2">
         <button
-          pButton
-          type="button"
-          label="Previous"
-          icon="pi pi-chevron-left"
-          class="p-button-sm p-button-outlined"
-          [disabled]="currentPage() === 1"
           (click)="onPageChange(currentPage() - 1)"
-        ></button>
+          [disabled]="currentPage() === 1"
+          class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+        >
+          Previous
+        </button>
 
         <button
-          *ngFor="
-            let page of [].constructor(min(totalPages(), 5));
-            let i = index
-          "
-          pButton
-          type="button"
-          [label]="(i + 1).toString()"
-          class="p-button-sm"
-          [ngClass]="{
-            'p-button-warning': currentPage() === i + 1,
-            'p-button-outlined': currentPage() !== i + 1
-          }"
+          *ngFor="let page of [].constructor(totalPages()); let i = index"
           (click)="onPageChange(i + 1)"
-        ></button>
+          class="px-3 py-1 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50"
+          [class.bg-amber-500]="currentPage() === i + 1"
+          [class.text-white]="currentPage() === i + 1"
+          [class.text-gray-700]="currentPage() !== i + 1"
+        >
+          {{ i + 1 }}
+        </button>
 
         <button
-          pButton
-          type="button"
-          label="Next"
-          icon="pi pi-chevron-right"
-          iconPos="right"
-          class="p-button-sm p-button-outlined"
-          [disabled]="currentPage() >= totalPages()"
           (click)="onPageChange(currentPage() + 1)"
-        ></button>
+          [disabled]="currentPage() >= totalPages()"
+          class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Reservation Details Dialog -->
-<p-dialog
-  [(visible)]="showDetailDialog"
-  [header]="
-    'Reservation Details - ' + (selectedReservation()?.reservationNumber || '')
-  "
-  [modal]="true"
-  [style]="{ width: '50vw' }"
-  [breakpoints]="{ '960px': '75vw', '640px': '95vw' }"
-  [draggable]="false"
-  [resizable]="false"
->
-  <div *ngIf="selectedReservation() as reservation" class="space-y-6">
-    <!-- Guest Information -->
-    <div>
-      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <i class="pi pi-user text-blue-600"></i>
-        Guest Information
-      </h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm text-gray-600">Name</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.guest.name }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Email</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.guest.email }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Phone</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.guest.phone || "N/A" }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Nationality</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.guest.nationality || "N/A" }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reservation Details -->
-    <div class="border-t border-gray-200 pt-4">
-      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <i class="pi pi-calendar text-blue-600"></i>
-        Reservation Details
-      </h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm text-gray-600">Check-in</p>
-          <p class="font-semibold text-gray-900">
-            {{ formatDate(reservation.checkIn) }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Check-out</p>
-          <p class="font-semibold text-gray-900">
-            {{ formatDate(reservation.checkOut) }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Nights</p>
-          <p class="font-semibold text-gray-900">{{ reservation.nights }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Guests</p>
-          <p class="font-semibold text-gray-900">{{ reservation.guests }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Status</p>
-          <p-tag
-            [value]="reservation.status"
-            [severity]="getStatusSeverity(reservation.status)"
-          ></p-tag>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Total Amount</p>
-          <p class="font-semibold text-gray-900 text-lg">
-            {{ formatCurrency(reservation.total) }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Room Information -->
-    <div class="border-t border-gray-200 pt-4">
-      <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <i class="pi pi-home text-blue-600"></i>
-        Room Information
-      </h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm text-gray-600">Room Number</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.room.number }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Room Type</p>
-          <p class="font-semibold text-gray-900">{{ reservation.room.type }}</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Floor</p>
-          <p class="font-semibold text-gray-900">
-            {{ reservation.room.floor || "N/A" }}
-          </p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-600">Features</p>
-          <div class="flex flex-wrap gap-1 mt-1">
-            <span
-              *ngFor="let feature of reservation.room.features"
-              class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"
-            >
-              {{ feature }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Special Requests -->
-    <div
-      *ngIf="reservation.specialRequests"
-      class="border-t border-gray-200 pt-4"
-    >
-      <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
-        <i class="pi pi-info-circle text-blue-600"></i>
-        Special Requests
-      </h3>
-      <p class="text-gray-700">{{ reservation.specialRequests }}</p>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="border-t border-gray-200 pt-4 flex gap-2 justify-end">
-      <button
-        pButton
-        type="button"
-        label="Change Status"
-        icon="pi pi-refresh"
-        class="p-button-warning"
-      ></button>
-      <button
-        pButton
-        type="button"
-        label="Edit"
-        icon="pi pi-pencil"
-        class="p-button-primary"
-        (click)="editReservation(reservation)"
-      ></button>
-    </div>
-  </div>
-</p-dialog>
-
-<!-- Toast Messages -->
-<p-toast></p-toast>
-
-<!-- Confirmation Dialog -->
-<p-confirmDialog></p-confirmDialog>

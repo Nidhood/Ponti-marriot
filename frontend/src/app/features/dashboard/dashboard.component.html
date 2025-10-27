@@ -26,31 +26,19 @@
         *ngIf="isReservations()"
       ></app-dashboard-reservations>
 
-      <!-- Guests Component (Lazy Loaded) -->
-      <div *ngIf="isGuests()" class="text-center py-20">
-        <h2 class="text-2xl font-bold text-gray-900">Guests Module</h2>
-        <p class="text-gray-500 mt-2">Coming soon...</p>
-      </div>
+      <!-- Guests Component -->
+      <app-dashboard-guests *ngIf="isGuests()"></app-dashboard-guests>
 
-      <!-- Rooms Component (Lazy Loaded) -->
-      <div *ngIf="isRooms()" class="text-center py-20">
-        <h2 class="text-2xl font-bold text-gray-900">Rooms Module</h2>
-        <p class="text-gray-500 mt-2">Coming soon...</p>
-      </div>
+      <!-- Rooms Component -->
+      <app-dashboard-rooms *ngIf="isRooms()"></app-dashboard-rooms>
 
-      <!-- Payments Component (Lazy Loaded) -->
-      <div *ngIf="isPayments()" class="text-center py-20">
-        <h2 class="text-2xl font-bold text-gray-900">Payments Module</h2>
-        <p class="text-gray-500 mt-2">Coming soon...</p>
-      </div>
+      <!-- Payments Component -->
+      <app-dashboard-payments *ngIf="isPayments()"></app-dashboard-payments>
 
-      <!-- Reports Component (Lazy Loaded) -->
-      <div *ngIf="isReports()" class="text-center py-20">
-        <h2 class="text-2xl font-bold text-gray-900">Reports Module</h2>
-        <p class="text-gray-500 mt-2">Coming soon...</p>
-      </div>
+      <!-- Reports Component -->
+      <app-dashboard-reports *ngIf="isReports()"></app-dashboard-reports>
 
-      <!-- Account Component (Lazy Loaded) -->
+      <!-- Account Component-->
       <div *ngIf="isAccount()" class="text-center py-20">
         <h2 class="text-2xl font-bold text-gray-900">
           Account Settings Module

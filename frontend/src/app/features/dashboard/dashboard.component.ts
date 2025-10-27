@@ -14,6 +14,10 @@ import {
   MenuItem,
 } from './components/dashboard-sidebar/dashboard-sidebar.component';
 import { DashboardReservationsComponent } from './components/dashboard-reservations/dashboard-reservations.component';
+import { DashboardRoomsComponent } from './components/dashboard-rooms/dashboard-rooms.component';
+import { DashboardGuestsComponent } from './components/dashboard-guests/dashboard-guests.component';
+import { DashboardPaymentsComponent } from './components/dashboard-payments/dashboard-payments.component';
+import { DashboardReportsComponent } from './components/dashboard-reports/dashboard-reports.component';
 
 type DashboardView =
   | 'overview'
@@ -33,6 +37,10 @@ type DashboardView =
     DashboardHeaderComponent,
     DashboardSidebarComponent,
     DashboardReservationsComponent,
+    DashboardRoomsComponent,
+    DashboardGuestsComponent,
+    DashboardPaymentsComponent,
+    DashboardReportsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.component.html',
@@ -43,7 +51,7 @@ export class DashboardComponent implements OnInit {
   currentUser = signal({
     name: 'Ramon Ridwan',
     role: 'Administrator',
-    avatar: '/assets/images/avatar-placeholder.jpg',
+    avatar: '/images/lebroun.jpeg',
   });
 
   menuItems = signal<MenuItem[]>([

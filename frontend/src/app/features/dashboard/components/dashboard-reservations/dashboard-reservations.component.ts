@@ -290,4 +290,23 @@ export class DashboardReservationsComponent implements OnInit {
   min(a: number, b: number): number {
     return Math.min(a, b);
   }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'checked_in':
+      case 'Check-in':
+        return 'bg-green-100 text-green-700';
+      case 'upcoming':
+      case 'Pending':
+        return 'bg-blue-100 text-blue-700';
+      case 'checked_out':
+      case 'Completed':
+        return 'bg-gray-100 text-gray-700';
+      case 'canceled':
+      case 'Cancelled':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-50 text-gray-600';
+    }
+  }
 }

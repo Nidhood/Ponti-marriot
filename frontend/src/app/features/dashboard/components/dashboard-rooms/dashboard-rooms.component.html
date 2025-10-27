@@ -1,96 +1,207 @@
-<!-- src/app/features/dashboard/components/dashboard-rooms/dashboard-rooms.component.html -->
-
 <div class="space-y-6">
-  <!-- Header with Add Button -->
-  <div class="flex items-center justify-end">
-    <button
-      pButton
-      type="button"
-      label="Add new room"
-      icon="pi pi-plus"
-      class="p-button-warning"
-      style="background-color: #eab308; border-color: #eab308"
-    ></button>
+  <!-- Región / Hotel / Add Room -->
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <!-- Región + info -->
+    <div class="flex flex-col sm:flex-row sm:items-start gap-6">
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          Region
+        </p>
+        <div
+          class="text-gray-900 font-bold text-lg flex flex-wrap items-center gap-2"
+        >
+          {{ selectedRegionSig() }}
+
+          <button
+            class="text-[11px] px-2 py-1 rounded bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200"
+            (click)="changeRegion('Bogotá')"
+          >
+            Bogotá
+          </button>
+          <button
+            class="text-[11px] px-2 py-1 rounded bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200"
+            (click)="changeRegion('Medellín')"
+          >
+            Medellín
+          </button>
+          <button
+            class="text-[11px] px-2 py-1 rounded bg-gray-100 border border-gray-300 text-gray-600 hover:bg-gray-200"
+            (click)="changeRegion('Cartagena')"
+          >
+            Cartagena
+          </button>
+        </div>
+
+        <p class="text-xs text-gray-500 mt-1 max-w-xs">
+          Gestiona disponibilidad, tarifas y ocupación hotel por hotel.
+        </p>
+      </div>
+
+      <!-- Hotel dropdown -->
+      <div class="text-sm flex flex-col">
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+          Hotel
+        </label>
+
+        <p-dropdown
+          [options]="hotelOptions()"
+          [(ngModel)]="selectedHotel"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="false"
+          styleClass="w-56"
+          (onChange)="onHotelChange($event.value)"
+        ></p-dropdown>
+      </div>
+    </div>
+
+    <!-- Add room -->
+    <div class="flex justify-end">
+      <button
+        pButton
+        type="button"
+        label="Add new room"
+        icon="pi pi-plus"
+        class="p-button-warning"
+        style="background-color: #eab308; border-color: #eab308"
+        (click)="createRoom()"
+      ></button>
+    </div>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- === KPI / Stats Cards (usa stats()) === -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Total Rooms -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div
+      *ngFor="let stat of stats()"
+      class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+    >
       <div class="flex items-start justify-between">
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Total Rooms</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().totalRooms }}
+          <p class="text-sm font-medium text-gray-600">
+            {{ stat.title }}
           </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-building text-xl"></i>
-        </div>
-      </div>
-    </div>
 
-    <!-- Available -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Available</p>
           <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().available }}
+            {{ stat.value }}
           </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-check-circle text-xl"></i>
-        </div>
-      </div>
-    </div>
 
-    <!-- Occupied -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Occupied</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ stats().occupied }}
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center"
-        >
-          <i class="pi pi-star-fill text-xl"></i>
-        </div>
-      </div>
-    </div>
+          <p
+            class="text-xs mt-2 flex items-center gap-1"
+            [class.text-green-600]="stat.trend === 'up'"
+            [class.text-red-600]="stat.trend === 'down'"
+          >
+            <!-- flecha up -->
+            <svg
+              *ngIf="stat.trend === 'up'"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+              />
+            </svg>
 
-    <!-- Avg. Rate/Night -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-600">Avg. Rate/Night</p>
-          <p class="text-2xl font-bold text-gray-900 mt-2">
-            {{ formatCurrency(stats().avgRatePerNight) }}
+            <!-- flecha down -->
+            <svg
+              *ngIf="stat.trend === 'down'"
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"
+              />
+            </svg>
+
+            <span>{{ stat.change }}</span>
           </p>
         </div>
+
         <div
-          class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center"
+          [class]="
+            stat.iconColor +
+            ' w-12 h-12 rounded-lg flex items-center justify-center'
+          "
         >
-          <i class="pi pi-user-plus text-xl"></i>
+          <!-- Íconos -->
+          <svg
+            *ngIf="stat.icon === 'building'"
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            />
+          </svg>
+
+          <svg
+            *ngIf="stat.icon === 'check-circle'"
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+
+          <svg
+            *ngIf="stat.icon === 'home'"
+            class="w-6 h-6"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.7-6.3 4.7 2.3-7-6-4.6h7.6z"
+            />
+          </svg>
+
+          <svg
+            *ngIf="stat.icon === 'currency'"
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Room Type Cards -->
+  <!-- === Cards por tipo de habitación === -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <div
       *ngFor="let roomType of roomTypeStats()"
       class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
     >
-      <!-- Room Image -->
+      <!-- Imagen -->
       <div class="relative h-64 bg-gray-200">
         <img
           [src]="roomType.image"
@@ -100,22 +211,25 @@
         />
       </div>
 
-      <!-- Room Info -->
+      <!-- Info -->
       <div class="p-6">
         <h3 class="text-xl font-bold text-gray-900 mb-2">
           {{ roomType.type }}
         </h3>
         <p class="text-sm text-gray-600 mb-4">{{ roomType.description }}</p>
 
-        <!-- Stats Grid -->
         <div class="grid grid-cols-3 gap-4 mb-4">
           <div>
             <p class="text-xs text-gray-500">Total rooms:</p>
-            <p class="font-semibold text-gray-900">{{ roomType.totalRooms }}</p>
+            <p class="font-semibold text-gray-900">
+              {{ roomType.totalRooms }}
+            </p>
           </div>
           <div>
             <p class="text-xs text-gray-500">Available:</p>
-            <p class="font-semibold text-green-600">{{ roomType.available }}</p>
+            <p class="font-semibold text-green-600">
+              {{ roomType.available }}
+            </p>
           </div>
           <div>
             <p class="text-xs text-gray-500">Rate/Night:</p>
@@ -125,7 +239,6 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="flex gap-2">
           <button
             pButton
@@ -136,6 +249,7 @@
             style="background-color: #1e293b; border-color: #1e293b"
             (click)="viewRoomDetails(roomType)"
           ></button>
+
           <button
             pButton
             type="button"
@@ -150,77 +264,548 @@
     </div>
   </div>
 
-  <!-- Recent Room Reservations -->
+  <!-- === Tabla de reservas recientes === -->
   <div
     class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
   >
+    <!-- Header / filtros -->
     <div
-      class="px-6 py-4 border-b border-gray-200 flex items-center justify-between"
+      class="px-6 py-4 border-b border-gray-200 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
     >
       <h2 class="text-lg font-bold text-gray-900">Recent Room Reservations</h2>
 
-      <!-- Filters -->
-      <div class="flex items-center gap-3">
-        <p-dropdown
-          [options]="hotelOptions()"
-          [(ngModel)]="selectedHotel"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="false"
-          styleClass="w-48"
-          (onChange)="onFilterChange()"
-        ></p-dropdown>
+      <div class="flex flex-col lg:flex-row lg:items-center flex-wrap gap-4">
+        <!-- Hotel -->
+        <div class="text-sm flex flex-col">
+          <span
+            class="block text-xs font-semibold text-gray-500 uppercase mb-1"
+          >
+            Hotel
+          </span>
 
-        <p-dropdown
-          [options]="statusOptions"
-          [(ngModel)]="selectedStatus"
-          placeholder="All Status"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="false"
-          styleClass="w-40"
-          (onChange)="onFilterChange()"
-        ></p-dropdown>
+          <p-dropdown
+            [options]="hotelOptions()"
+            [(ngModel)]="selectedHotel"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            styleClass="w-48"
+            (onChange)="onHotelChange($event.value)"
+          ></p-dropdown>
+        </div>
 
-        <p-dropdown
-          [options]="roomTypeOptions"
-          [(ngModel)]="selectedRoomType"
-          placeholder="All Room Types"
-          optionLabel="label"
-          optionValue="value"
-          [showClear]="false"
-          styleClass="w-40"
-          (onChange)="onFilterChange()"
-        ></p-dropdown>
+        <!-- Status -->
+        <div class="text-sm flex flex-col">
+          <span
+            class="block text-xs font-semibold text-gray-500 uppercase mb-1"
+          >
+            Status
+          </span>
+
+          <p-dropdown
+            [options]="statusOptions"
+            [(ngModel)]="selectedStatus"
+            placeholder="All Status"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            styleClass="w-40"
+            (onChange)="onStatusChange($event.value)"
+          ></p-dropdown>
+        </div>
+
+        <!-- Room Type -->
+        <div class="text-sm flex flex-col">
+          <span
+            class="block text-xs font-semibold text-gray-500 uppercase mb-1"
+          >
+            Room Type
+          </span>
+
+          <p-dropdown
+            [options]="roomTypeOptions"
+            [(ngModel)]="selectedRoomType"
+            placeholder="All Room Types"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+            styleClass="w-40"
+            (onChange)="onRoomTypeChange($event.value)"
+          ></p-dropdown>
+        </div>
       </div>
     </div>
 
-    <!-- Reservations Table -->
-    <p-table
-      [value]="recentReservations()"
-      [loading]="loading()"
-      styleClass="p-datatable-sm"
-      responsiveLayout="scroll"
-      [rowHover]="true"
-    >
-      <ng-template pTemplate="header">
-        <tr>
-          <th class="font-semibold text-gray-700">GUEST</th>
-          <th class="font-semibold text-gray-700">ROOM TYPE</th>
-          <th class="font-semibold text-gray-700">ROOM</th>
-          <th class="font-semibold text-gray-700">CHECK-IN</th>
-          <th class="font-semibold text-gray-700">CHECK-OUT</th>
-          <th class="font-semibold text-gray-700">STATUS</th>
-          <th class="font-semibold text-gray-700">TOTAL</th>
-        </tr>
-      </ng-template>
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Guest
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Room Type
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Room
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Check-in
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Check-out
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider text-right"
+            >
+              Total
+            </th>
+            <th
+              class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
 
-      <ng-template pTemplate="body" let-reservation>
-        <tr>
-          <!-- Guest -->
-          <td>
-            <div class="flex items"></div>
-          </td></tr></ng-template
-    ></p-table>
+        <tbody class="divide-y divide-gray-200">
+          <tr
+            *ngFor="let reservation of paginatedReservations()"
+            class="hover:bg-gray-50 transition-colors align-top"
+          >
+            <!-- Guest -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <img
+                  [src]="reservation.avatar"
+                  [alt]="reservation.guest"
+                  class="w-10 h-10 rounded-full bg-gray-200 object-cover"
+                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23cbd5e1%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E'"
+                />
+
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-900">
+                    {{ reservation.guest }}
+                  </span>
+                  <span class="text-[11px] leading-tight text-gray-500">
+                    {{ reservation.id }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Room Type -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ reservation.roomType }}
+            </td>
+
+            <!-- Room -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <div class="font-semibold text-gray-800">
+                #{{ reservation.room }}
+              </div>
+              <div class="text-[11px] text-gray-500">
+                {{ reservation.region }} / {{ reservation.hotelId }}
+              </div>
+            </td>
+
+            <!-- Check-in -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ reservation.checkIn | date : "MMM d, y" }}
+            </td>
+
+            <!-- Check-out -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ reservation.checkOut | date : "MMM d, y" }}
+            </td>
+
+            <!-- Status -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="px-3 py-1 text-xs font-semibold rounded-full inline-flex items-center gap-1"
+                [class]="getStatusClass(reservation.status)"
+              >
+                <i
+                  class="pi text-xs"
+                  [ngClass]="{
+                    'pi-sign-in': reservation.status === 'checked_in',
+                    'pi-clock': reservation.status === 'upcoming',
+                    'pi-check': reservation.status === 'checked_out',
+                    'pi-times': reservation.status === 'canceled'
+                  }"
+                ></i>
+
+                <span class="capitalize">
+                  {{ reservation.status.replace("_", " ") }}
+                </span>
+              </span>
+            </td>
+
+            <!-- Total -->
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right"
+            >
+              {{ formatCurrency(reservation.total) }}
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+              <div class="flex flex-row justify-end gap-2">
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-check-circle"
+                  class="p-button-rounded p-button-text p-button-success p-button-sm"
+                  pTooltip="Mark Available"
+                  tooltipPosition="top"
+                  (click)="markAsAvailable('room-' + reservation.room)"
+                ></button>
+
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-user"
+                  class="p-button-rounded p-button-text p-button-warning p-button-sm"
+                  pTooltip="Mark Occupied"
+                  tooltipPosition="top"
+                  (click)="markAsOccupied('room-' + reservation.room)"
+                ></button>
+
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-calendar"
+                  class="p-button-rounded p-button-text p-button-info p-button-sm"
+                  pTooltip="Mark Reserved"
+                  tooltipPosition="top"
+                  (click)="markAsReserved('room-' + reservation.room)"
+                ></button>
+
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                  pTooltip="Delete Room"
+                  tooltipPosition="top"
+                  (click)="deleteRoom('room-' + reservation.room)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination footer -->
+    <div
+      class="px-6 py-4 border-t border-gray-200 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p class="text-sm text-gray-600">
+        Showing
+        {{ (currentPage() - 1) * pageSize + 1 }}
+        to
+        {{ min(currentPage() * pageSize, totalResults()) }}
+        of
+        {{ totalResults() }}
+        results
+      </p>
+
+      <div class="flex items-center gap-2">
+        <button
+          (click)="changePage(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+
+        <button
+          *ngFor="let page of pageRange()"
+          (click)="changePage(page)"
+          [class.bg-amber-500]="currentPage() === page"
+          [class.text-white]="currentPage() === page"
+          [class.bg-white]="currentPage() !== page"
+          [class.text-gray-700]="currentPage() !== page"
+          class="px-3 py-1 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50"
+        >
+          {{ page }}
+        </button>
+
+        <button
+          (click)="changePage(currentPage() + 1)"
+          [disabled]="currentPage() >= getTotalPages()"
+          class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Guest Stats + Wallet Row === -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Guest Stats -->
+    <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div
+        *ngFor="let stat of guestStats()"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+      >
+        <div class="flex flex-col items-center text-center gap-3">
+          <div
+            [class]="
+              stat.iconColor +
+              ' w-14 h-14 rounded-full flex items-center justify-center'
+            "
+          >
+            <!-- íconos -->
+            <svg
+              *ngIf="stat.icon === 'users'"
+              class="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+            <svg
+              *ngIf="stat.icon === 'user-check'"
+              class="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <svg
+              *ngIf="stat.icon === 'crown'"
+              class="w-7 h-7"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.7-6.3 4.7 2.3-7-6-4.6h7.6z"
+              />
+            </svg>
+            <svg
+              *ngIf="stat.icon === 'user-plus'"
+              class="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+              />
+            </svg>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-600">
+              {{ stat.title }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 mt-1">
+              {{ stat.value }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet Card -->
+    <div
+      class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-lg p-6 text-white relative overflow-hidden"
+    >
+      <div class="relative z-10">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold">Wallet</h3>
+          <button
+            class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-xs font-semibold transition-colors backdrop-blur-sm"
+          >
+            Withdraw Funds
+          </button>
+        </div>
+
+        <!-- Trophy / badge -->
+        <div class="flex justify-center mb-6">
+          <div class="relative">
+            <div
+              class="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
+            >
+              <svg
+                class="w-14 h-14 text-yellow-300"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                />
+              </svg>
+            </div>
+            <div class="absolute -top-2 -left-2">
+              <svg
+                class="w-6 h-6 text-yellow-400"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                />
+              </svg>
+            </div>
+            <div class="absolute -bottom-3 -right-3">
+              <svg
+                class="w-8 h-8 text-yellow-400"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Earnings / Balance -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs text-gray-400 mb-1">Total Earnings</p>
+            <p class="text-xl font-bold">
+              ₦{{ walletEarnings().toLocaleString() }}.00
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+              Please note this is the total sum of yr transaction here on
+              <span class="font-semibold">DOOR AFRICA</span>
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-1">Balance</p>
+            <p class="text-xl font-bold">
+              ₦{{ walletBalance().toLocaleString() }}.00
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+              Please note this the current balance amount left on yr wallet
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- decor -->
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-yellow-400/10 rounded-full -mr-16 -mt-16"
+      ></div>
+      <div
+        class="absolute bottom-0 left-0 w-24 h-24 bg-purple-400/10 rounded-full -ml-12 -mb-12"
+      ></div>
+    </div>
+  </div>
+
+  <!-- === Room Stats bottom === -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div
+      *ngFor="let stat of roomStats()"
+      class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+    >
+      <div class="flex flex-col items-center text-center gap-3">
+        <div
+          [class]="
+            stat.iconColor +
+            ' w-14 h-14 rounded-full flex items-center justify-center'
+          "
+        >
+          <svg
+            *ngIf="stat.icon === 'building'"
+            class="w-7 h-7"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            />
+          </svg>
+          <svg
+            *ngIf="stat.icon === 'check-circle'"
+            class="w-7 h-7"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <svg
+            *ngIf="stat.icon === 'home'"
+            class="w-7 h-7"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.7-6.3 4.7 2.3-7-6-4.6h7.6z"
+            />
+          </svg>
+          <svg
+            *ngIf="stat.icon === 'currency'"
+            class="w-7 h-7"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-sm font-medium text-gray-600">
+            {{ stat.title }}
+          </p>
+          <p class="text-2xl font-bold text-gray-900 mt-1">
+            <span *ngIf="stat.icon === 'currency'">$</span>{{ stat.value }}
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
