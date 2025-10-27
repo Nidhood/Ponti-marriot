@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgOptimizedImage } from '@angular/common';
 
 export interface Brand {
   name: string;
@@ -9,7 +9,7 @@ export interface Brand {
 @Component({
   standalone: true,
   selector: 'app-home-brands',
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-brands.component.html',
 })

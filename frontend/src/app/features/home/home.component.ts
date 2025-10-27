@@ -35,13 +35,13 @@ export class HomeComponent {
   brandsTitle = 'Trusted by leading hotels worldwide';
 
   brands = [
-    { name: 'Marriott', logo: '/images/brands/marriott.png' },
-    { name: 'Hilton', logo: '/images/brands/hilton.png' },
-    { name: 'Hyatt', logo: '/images/brands/hyatt.png' },
-    { name: 'Four Seasons', logo: '/images/brands/fourseasons.png' },
-    { name: 'Ritz Carlton', logo: '/images/brands/ritzcarlton.png' },
-    { name: 'Waldorf Astoria', logo: '/images/brands/waldorf.png' },
-    { name: 'Fairmont', logo: '/images/brands/fairmont.png' },
-    { name: 'Rosewood', logo: '/images/brands/rosewood.png' },
+    { name: 'Marriott', logo: '/images/brands/marriott.webp' },
+    { name: 'Hilton', logo: '/images/brands/hilton.webp' },
+    { name: 'Hyatt', logo: '/images/brands/hyatt.webp' },
+    { name: 'Four Seasons', logo: '/images/brands/fourseasons.webp' },
+    { name: 'Ritz Carlton', logo: '/images/brands/ritzcarlton.webp' },
+    { name: 'Waldorf Astoria', logo: '/images/brands/waldorf.webp' },
+    { name: 'Fairmont', logo: '/images/brands/fairmont.webp' },
+    { name: 'Rosewood', logo: '/images/brands/rosewood.webp' },
   ];
 }

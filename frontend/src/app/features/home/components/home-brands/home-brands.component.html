@@ -17,9 +17,12 @@
         class="flex items-center justify-center w-full h-20 sm:h-24 px-4 grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
       >
         <img
-          [src]="brand.logo"
+          [ngSrc]="brand.logo"
           [alt]="brand.name"
+          width="150"
+          height="80"
           class="max-w-full max-h-full w-auto h-auto object-contain"
+          priority
         />
       </div>
     </div>

@@ -9,9 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG (ya migrado)
 import { SelectModule } from 'primeng/select';
-import { Button } from 'primeng/button';
 
 // D3
 import * as d3 from 'd3';
@@ -19,18 +17,15 @@ import * as d3 from 'd3';
 @Component({
   selector: 'app-dashboard-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectModule, Button],
+  imports: [CommonModule, FormsModule, SelectModule],
   templateUrl: './dashboard-reports.component.html',
 })
 export class DashboardReportsComponent implements AfterViewInit {
-  // los svg del template
   @ViewChild('revenueChart') revenueChart?: ElementRef<SVGElement>;
   @ViewChild('occupancyChart') occupancyChart?: ElementRef<SVGElement>;
 
-  // estado de UI
   chartMode: 'monthly' | 'weekly' = 'monthly';
 
-  // filtro de rango
   selectedRange = 'Last 30 Days';
   dateRanges = [
     { label: 'Last 7 Days', value: 'Last 7 Days' },
@@ -38,11 +33,8 @@ export class DashboardReportsComponent implements AfterViewInit {
     { label: 'Last 90 Days', value: 'Last 90 Days' },
   ];
 
-  // búsqueda en tabla
   searchTerm = signal<string>('');
 
-  // ========= DATA MOCK basada en tu app =========
-  // ingresos mensuales simulados
   private _revenueDataMonthly = signal([
     { label: 'Jan', value: 220000 },
     { label: 'Feb', value: 240000 },
@@ -58,7 +50,6 @@ export class DashboardReportsComponent implements AfterViewInit {
     { label: 'Dec', value: 295000 },
   ]);
 
-  // ejemplo semanal (últimas 8 semanas)
   private _revenueDataWeekly = signal([
     { label: 'Wk 1', value: 54000 },
     { label: 'Wk 2', value: 61000 },
@@ -70,13 +61,11 @@ export class DashboardReportsComponent implements AfterViewInit {
     { label: 'Wk 8', value: 76000 },
   ]);
 
-  // ocupación global (rooms)
   occupancyData = signal({
     occupied: 87.3,
     available: 12.7,
   });
 
-  // transacciones recientes (similar a payments/reservations)
   private _transactions = signal([
     {
       id: '#TXN-001247',
@@ -104,7 +93,6 @@ export class DashboardReportsComponent implements AfterViewInit {
     },
   ]);
 
-  // tabla filtrada
   filteredTxs = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     return this._transactions().filter(
@@ -114,7 +102,6 @@ export class DashboardReportsComponent implements AfterViewInit {
     );
   });
 
-  // KPIs arriba
   stats = computed(() => [
     {
       title: 'Total Revenue',
@@ -150,23 +137,18 @@ export class DashboardReportsComponent implements AfterViewInit {
     },
   ]);
 
-  // ================= LIFECYCLE =================
   ngAfterViewInit() {
     this.safeRenderCharts();
   }
 
-  // cuando cambia el rango de fechas arriba a la derecha
   updateCharts() {
     this.safeRenderCharts();
   }
-
-  // cuando el usuario cambia Weekly / Monthly en el gráfico
   setChartMode(mode: 'monthly' | 'weekly') {
     this.chartMode = mode;
     this.safeRenderCharts();
   }
 
-  // ================= HELPERS PÚBLICOS =================
   onSearchChange(next: string) {
     this.searchTerm.set(next);
   }
@@ -186,7 +168,6 @@ export class DashboardReportsComponent implements AfterViewInit {
     });
   }
 
-  // ================== CHART RENDER WRAPPER ==================
   private safeRenderCharts() {
     if (this.revenueChart?.nativeElement) {
       this.renderRevenueChart();
@@ -196,10 +177,7 @@ export class DashboardReportsComponent implements AfterViewInit {
     }
   }
 
-  // ================== D3 CHARTS ==================
-
   private renderRevenueChart() {
-    // elegimos dataset según modo
     const data =
       this.chartMode === 'monthly'
         ? this._revenueDataMonthly()
@@ -209,12 +187,10 @@ export class DashboardReportsComponent implements AfterViewInit {
     const svg = d3.select(svgEl);
     svg.selectAll('*').remove();
 
-    // dimensiones internas
     const width = 600;
     const height = 250;
     const margin = { top: 20, right: 20, bottom: 30, left: 50 };
 
-    // escalas
     const x = d3
       .scalePoint<string>()
       .domain(data.map((d) => d.label))
@@ -226,7 +202,6 @@ export class DashboardReportsComponent implements AfterViewInit {
       .domain([0, maxY * 1.1])
       .range([height - margin.bottom, margin.top]);
 
-    // generador de línea
     const lineGen = d3
       .line<{ label: string; value: number }>()
       .x((d) => x(d.label)!)
@@ -235,16 +210,14 @@ export class DashboardReportsComponent implements AfterViewInit {
 
     svg.attr('viewBox', `0 0 ${width} ${height}`);
 
-    // línea azul
     svg
       .append('path')
       .datum(data)
       .attr('fill', 'none')
-      .attr('stroke', '#2563eb') // tailwind blue-600
+      .attr('stroke', '#2563eb')
       .attr('stroke-width', 2)
       .attr('d', lineGen);
 
-    // puntos
     svg
       .selectAll('circle.point')
       .data(data)
@@ -256,16 +229,14 @@ export class DashboardReportsComponent implements AfterViewInit {
       .attr('r', 4)
       .attr('fill', '#2563eb');
 
-    // eje X
     svg
       .append('g')
       .attr('transform', `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x).tickSizeOuter(0))
       .selectAll('text')
-      .attr('fill', '#6b7280') // gray-500
+      .attr('fill', '#6b7280')
       .style('font-size', '10px');
 
-    // eje Y
     svg
       .append('g')
       .attr('transform', `translate(${margin.left},0)`)
@@ -278,15 +249,15 @@ export class DashboardReportsComponent implements AfterViewInit {
       .call((g) =>
         g.selectAll('text').attr('fill', '#6b7280').style('font-size', '10px')
       )
-      .call((g) => g.selectAll('line').attr('stroke', '#e5e7eb')) // grid color
-      .call((g) => g.select('.domain').attr('stroke', '#9ca3af')); // axis line
+      .call((g) => g.selectAll('line').attr('stroke', '#e5e7eb'))
+      .call((g) => g.select('.domain').attr('stroke', '#9ca3af'));
   }
 
   private renderOccupancyChart() {
     const occ = this.occupancyData();
     const pieData = [
-      { label: 'Occupied', value: occ.occupied, color: '#2563eb' }, // blue-600
-      { label: 'Available', value: occ.available, color: '#d1d5db' }, // gray-300
+      { label: 'Occupied', value: occ.occupied, color: '#2563eb' },
+      { label: 'Available', value: occ.available, color: '#d1d5db' },
     ];
 
     const svgEl = this.occupancyChart!.nativeElement;
