@@ -324,35 +324,6 @@
                 >
                   <i class="pi pi-eye text-sm"></i>
                 </button>
-
-                <button
-                  *ngIf="payment.status === 'Completed'"
-                  (click)="refundPayment(payment)"
-                  class="w-8 h-8 rounded-full flex items-center justify-center bg-orange-100 hover:bg-orange-200 text-orange-600 transition-colors"
-                  title="Refund payment"
-                >
-                  <i class="pi pi-undo text-sm"></i>
-                </button>
-
-                <button
-                  *ngIf="payment.status === 'Pending'"
-                  (click)="approvePayment(payment)"
-                  class="w-8 h-8 rounded-full flex items-center justify-center bg-green-100 hover:bg-green-200 text-green-600 transition-colors"
-                  title="Approve payment"
-                >
-                  <i class="pi pi-check text-sm"></i>
-                </button>
-
-                <button
-                  *ngIf="
-                    payment.status === 'Pending' || payment.status === 'Failed'
-                  "
-                  (click)="cancelPayment(payment)"
-                  class="w-8 h-8 rounded-full flex items-center justify-center bg-red-100 hover:bg-red-200 text-red-600 transition-colors"
-                  title="Cancel payment"
-                >
-                  <i class="pi pi-times text-sm"></i>
-                </button>
               </div>
             </td>
           </tr>
